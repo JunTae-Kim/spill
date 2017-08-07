@@ -5,19 +5,19 @@
 
 int main()
 {
-	IplImage * srcImage;
+	IplImage* srcImage;
 
-	uchar *data;
+	uchar* data;
 	int i, j;
 	int height, width, size;
 
-	srcImage = cvLoadImage("siba.jpg", 0);
+	srcImage = cvLoadImage("siba.JPG", 0);
 
 	height = srcImage->height;
 	width = srcImage->width;
 	data = (uchar *)srcImage->imageData;
 
-	printf("기존픽셀 : height = %3d width = %3d \n", height, width);
+	printf("before : height = %3d width = %3d \n", height, width);
 
 	IplImage * amendedImage = cvCreateImage(cvSize(300, 200), IPL_DEPTH_8U, 1);
 
@@ -27,11 +27,11 @@ int main()
 	width = amendedImage->width;
 	data = (uchar *)amendedImage->imageData;
 
-	printf("수정픽셀 : height = %3d width = %3d\n", height, width);
+	printf("before : height = %3d width = %3d\n", height, width);
 	scanf("%d", &size);
 
-	cvNamedWindow("기존사진", CV_WINDOW_AUTOSIZE);
-	cvShowImage("기존사진", srcImage);
+	cvNamedWindow("before", CV_WINDOW_AUTOSIZE);
+	cvShowImage("before", srcImage);
 
 	for (i = 0;i < height;i++)
 	{
@@ -49,8 +49,8 @@ int main()
 		}
 	}
 
-	cvNamedWindow("수정사진", CV_WINDOW_AUTOSIZE);
-	cvShowImage("수정사진", amendedImage);
+	cvNamedWindow("after", CV_WINDOW_AUTOSIZE);
+	cvShowImage("after", amendedImage);
 
 	cvWaitKey(0);
 	cvDestroyAllWindows();
