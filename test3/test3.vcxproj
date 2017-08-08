@@ -24,7 +24,7 @@
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>test3</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.15063.0</WindowsTargetPlatformVersion>
-    <ProjectName>Opencv연습</ProjectName>
+    <ProjectName>Opencv</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -143,10 +143,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="라인검출.cpp" />
-    <ClCompile Include="에지검출.cpp" />
-    <ClCompile Include="최종.cpp" />
-    <ClCompile Include="픽셀축소.cpp" />
+    <ClCompile Include="Line_inspection.cpp" />
+    <ClCompile Include="Edge_inspection.cpp" />
+    <ClCompile Include="Combination.cpp" />
+    <ClCompile Include="Fixel_decrease.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

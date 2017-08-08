@@ -15,16 +15,16 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="에지검출.cpp">
+    <ClCompile Include="Combination.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="픽셀축소.cpp">
+    <ClCompile Include="Line_inspection.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="최종.cpp">
+    <ClCompile Include="Fixel_decrease.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="라인검출.cpp">
+    <ClCompile Include="Edge_inspection.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
