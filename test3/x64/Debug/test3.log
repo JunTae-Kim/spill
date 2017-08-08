@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: 중간 디렉터리(x64\Debug\)에 다른 프로젝트(Opencv연습.vcxproj, test3.vcxproj)에서 공유하는 파일이 포함되어 있습니다.  이로 인해 잘못된 정리 및 다시 빌드 동작이 수행될 수 있습니다.
   건너뛰고 있습니다... (관련된 변경 내용 없음)
   Fixel_decrease.cpp
@@ -6,3 +7,8 @@
   Line_inspection.cpp
   test3.vcxproj -> c:\Users\Heominho\documents\visual studio 2017\Projects\test3\x64\Debug\Opencv.exe
   test3.vcxproj -> c:\Users\Heominho\documents\visual studio 2017\Projects\test3\x64\Debug\Opencv.pdb (Partial PDB)
+=======
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(387,5): warning MSB8028: 중간 디렉터리(x64\Debug\)에 다른 프로젝트(test3.vcxproj)에서 공유하는 파일이 포함되어 있습니다.  이로 인해 잘못된 정리 및 다시 빌드 동작이 수행될 수 있습니다.
+  test3.vcxproj -> C:\Users\zzk15\Documents\spill\test3\x64\Debug\Opencv연습.exe
+  test3.vcxproj -> C:\Users\zzk15\Documents\spill\test3\x64\Debug\Opencv연습.pdb (Partial PDB)
+>>>>>>> 3acea5c07966d83baf5bf744f6bae5afafb7ed45

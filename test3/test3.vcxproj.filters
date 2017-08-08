@@ -15,6 +15,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
+<<<<<<< HEAD
     <ClCompile Include="Combination.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
@@ -25,6 +26,9 @@
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Edge_inspection.cpp">
+=======
+    <ClCompile Include="final.cpp">
+>>>>>>> 3acea5c07966d83baf5bf744f6bae5afafb7ed45
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
