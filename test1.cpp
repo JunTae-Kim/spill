@@ -30,7 +30,7 @@ int main()
 		return -1;
 	}
 
-	Mat img;
+	Mat img, edgeimg;
 	int64 t1, t2;
 	bool do_flip = false;
 
@@ -41,7 +41,9 @@ int main()
 		if (do_flip)
 			flip(img, img, -1);
 
+
 		unsigned char* data = (unsigned char*)img.data;
+
 
 		t1 = getTickCount();
 
@@ -52,21 +54,35 @@ int main()
 				if (data[i*width + j] > 110)
 				{
 					data[i*width + j] = 255;
+
+					if (j==319 && i>160)
+					{
+						data[i*width + j] = 0;
+					}
 				}
 	
 				else
 				{
 					data[i*width + j] = 0;
+					
+					if (j==319 && i>160)
+					{
+						data[i*width + j] = 255;
+					}
 				}
 			}
 		}
 
 		img.data=data;
 
+		Canny(img, edgeimg, 50, 100);
+
 		t2 = getTickCount();
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 		imshow("cam", img);
+		imshow("cam2", edgeimg);
+
 
 		int k = waitKey(1);
 		if (k == 27)
