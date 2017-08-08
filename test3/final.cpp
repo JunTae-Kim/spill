@@ -1,4 +1,3 @@
-
 #include <opencv/cv.hpp>				// 헤더파일 불러오기
 #include <opencv2/highgui.hpp>
 
