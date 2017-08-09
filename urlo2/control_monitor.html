@@ -1,0 +1,129 @@
+<html xmlns="http://www.w3.org/1999/xhtml" >
+<head>
+    <meta name="viewport" content="width=350;  maximum-scale=1;" />
+    <title></title>
+    <script type="text/javascript">
+
+        function call_flask_server(url) {
+            
+        try {
+            
+            var AJAX = null;
+            if (window.XMLHttpRequest) {
+                AJAX = new XMLHttpRequest();
+            } else {
+                AJAX = new ActiveXObject("Microsoft.XMLHTTP");
+            }
+
+
+            AJAX.open("GET", url, true);            
+            AJAX.send();           
+
+
+            return "ok : " + AJAX.responseText;
+
+
+        }
+        catch (err) {
+            return String("error : " + err);
+        }
+
+        return "";
+    }
+
+
+    function stop() {
+        call_flask_server("/stop");
+    }
+
+    function shutdown() {
+        call_flask_server("/shutdown");
+    }
+
+    function go_forward() {
+        call_flask_server("/go");
+    }
+
+    function go_back() {
+        call_flask_server("/back");
+    }
+
+    function turn_left() {
+        call_flask_server("/left");
+    }
+
+    function turn_right() {
+        call_flask_server("/right");
+    }
+
+    function auto_on() {
+        call_flask_server("/auto_on");
+    }
+
+    function auto_off() {
+        call_flask_server("/auto_off");
+    }
+    
+    
+    </script>
+</head>
+<body>
+
+
+<h3>원격 화면</h3>
+<div>
+<iframe src="http://192.168.123.126:8080/stream" width="320px" height="240px" ></iframe>
+</div>
+
+
+
+    <br />
+    <br />
+<br />
+
+
+
+
+
+<button id="btn_auto_on"         
+        style="position:absolute; left:15px; top: 330px; width: 74px; height: 26px;"  
+        onclick="javascript:auto_on();">Auto On</button>
+        
+<button id="btn_auto_off" 
+        
+        style="position:absolute; left:96px; top: 330px; width: 74px; height: 27px; margin-top: 1px;"  
+        onclick="javascript:auto_off();">Auto Off</button>
+
+
+
+
+    <button id="btn_go" 
+        
+        style="position:absolute; left:71px; top: 416px; width: 45px; height: 31px;"  
+        onclick="javascript:go_forward();"> Go</button>
+        
+        <button id="btn_back" 
+        
+        style="position:absolute; left:74px; top: 498px; width: 45px; height: 29px;"  
+        onclick="javascript:go_back();"> Back</button>
+        
+        <button id="btn_left" 
+        
+        style="position:absolute; left:9px; top: 457px; width: 45px; height: 25px; margin-top: 1px;"  
+        onclick="javascript:turn_left();"> Left</button>
+        
+        <button id="btn_right" 
+        
+        style="position:absolute; left:135px; top: 457px; width: 45px; height: 31px;"  
+        onclick="javascript:turn_right();"> Right</button>
+
+
+
+
+
+
+
+
+
+</body>
+</html>
