@@ -13,14 +13,14 @@ using namespace std;
 
 int main()
 {
-	int width = 640;
-	int height = 480;
+	int width = 320;
+	int height = 240;
 
 	raspicam::RaspiCam_Cv cam;
 
 	cam.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-	cam.set(CV_CAP_PROP_FRAME_WIDTH, 640);
-	cam.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+	cam.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+	cam.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
 
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
@@ -64,9 +64,10 @@ int main()
 		Mat element = getStructuringElement(element_shape, Size(n,n));
 		dilate(red_hue_image, red_hue_image, element);
 
-		HoughLines(ROIframe, lines, 1, CV_PI / 180, 150, 0, 0);
+		Canny(image, edgeimg, 650, 700);
+
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 150, 0, 0);
 		
-		Canny(image, edgeimg, 600, 750);
 
 		t1 = getTickCount();
 
