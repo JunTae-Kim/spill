@@ -1,4 +1,3 @@
-
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <raspicam/raspicam_cv.h>
@@ -7,6 +6,11 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <wiringPi.h>
+#include <softPwm.h>
+
+#define SERVO 1
+#define RANGE 100
 
 using namespace cv;
 using namespace std;
@@ -34,13 +38,18 @@ int main()
 		return -1;
 	}
 */
-	Mat frame, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range, red_hue_image, hsv, image, ROIframe, REDframe;
+
+	if (wiringPiSetup() == -1) return 1; //wiringPi error
+
+	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range, red_hue_image, hsv, ROIframe;
 	int64 t1, t2;
-	bool do_flip = false;
-	int i, j;
+	bool do_flip = true;
+	int i, j, tag;
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
 	float angle, angle2;
+	softPwmCreate(SERVO, 0, RANGE);
+
 
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
@@ -54,6 +63,8 @@ int main()
 			flip(image, image, -1);
 
 		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);
+		Canny(image, edgeimg, 550, 600);
+
 		cvtColor(ROIframe, hsv, CV_BGR2HSV);
 		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);
 
@@ -64,12 +75,16 @@ int main()
 		Mat element = getStructuringElement(element_shape, Size(n,n));
 		dilate(red_hue_image, red_hue_image, element);
 
-		Canny(image, edgeimg, 650, 700);
+//		Canny(image, edgeimg, 550, 600);
 
-		HoughLines(edgeimg, lines, 1, CV_PI / 180, 150, 0, 0);
-		
+//		HoughLines(ROIframe, lines, 1, CV_PI / 180, 0, 100);
+//		HoughLines(ROIframe, lines, 1, CV_PI / 180, 150, 0, 0);
+//		HoughLines(edgeimg, lines, 1, CV_PI / 180, 0, 100);
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);
+//		Canny(image, edgeimg, 550, 600);
 
 		t1 = getTickCount();
+//		printf("%d\n",lines.size());
 
 		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 		{
@@ -78,8 +93,20 @@ int main()
 			float theta1, theta2, theta3;
 			float rho1, rho2, rho3;
 			int length = 800;
+			
+			if (tag == 1)
+			{
+				pt1.x=0;
+				pt1.y=0;
+				pt2.x=0;
+				pt2.y=0;
+				pt3.x=0;
+				pt3.y=0;
+				pt4.x=0;
+				pt4.y=0;
+			}
 
-			if (theta<1.5 && theta>0)
+			if (theta<1.5 && theta>=0)
 			{
 				theta1 = theta;
 				rho1 = rho;
@@ -92,10 +119,12 @@ int main()
 				pt2.y = cvRound(y0 + length * (a));
 
 				angle = (atan2(pt1.y - pt2.y, pt1.x - pt2.x))*(180 / CV_PI);
-				printf("floats: \n %f", angle); //printing angle 
+				printf("floats : %f\n", angle); //printing angle 
+
+				tag = 0;
 			}
 
-			else if (theta<3.14 && theta>2.0)
+			else if (theta<3.14 && theta>=2.0)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -106,38 +135,53 @@ int main()
 				pt3.y = cvRound(y02 - length * (a2));
 				pt4.x = cvRound(x02 + length * (-b2));
 				pt4.y = cvRound(y02 + length * (a2));
+
 				angle2 = (atan2(pt3.y - pt4.y, pt3.x - pt4.x))*(180 / CV_PI);
-				//printf("floats2: \n %f", angle2); //printing angle °¢µµÈ®ÀÎÀ» À§ÇÑ ÇÁž°Æ®ÄÚµå 
+				printf("floats2 : %f\n", angle2); //printing angle °¢µµÈ®ÀÎÀ» À§ÇÑ ÇÁž°Æ®ÄÚµå 
+
+				tag = 0;
 			}
-		} // Car Lane "for" End 
+		}
+
 
 		if (waitKey(30) == 27) {
 			cout << "esc key is pressed by user" << endl;
-			break;
 		}
 
 		else if (pt1.x != 0 && pt3.x != 0) { //forward 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-			//break; 
+
+			printf("forward\n");
+			softPwmWrite(SERVO, 15);
+			delay(300);
+			tag = 1;
+
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) { //left 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-			//break; 
+
+			printf("right\n");
+			softPwmWrite(SERVO, 18);
+			delay(300);
+			tag = 1;
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0) { //right 
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-			//break; 
+
+			printf("left\n");
+			softPwmWrite(SERVO, 12);
+			delay(300);
+			tag = 1;
 		}
 
 		else {
-			//break;
 		}
 
 		t2 = getTickCount();
-		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
+//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
