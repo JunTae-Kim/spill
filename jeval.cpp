@@ -10,7 +10,10 @@
 #include <softPwm.h>
 
 #define SERVO 1
-#define RANGE 100
+#define RANGE 200
+#define PWM 21
+#define DIR 22
+#define ENABLE 23
 
 using namespace cv;
 using namespace std;
@@ -42,12 +45,11 @@ int main()
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
 	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range, red_hue_image, hsv, ROIframe;
-	int64 t1, t2;
+//	int64 t1, t2;
 	bool do_flip = true;
-	int i, j, tag;
+	int tag;
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
-	float angle, angle2;
 	softPwmCreate(SERVO, 0, RANGE);
 
 
@@ -63,7 +65,7 @@ int main()
 			flip(image, image, -1);
 
 		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 550, 600);
+		Canny(image, edgeimg, 350, 400);
 
 		cvtColor(ROIframe, hsv, CV_BGR2HSV);
 		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);
@@ -75,23 +77,16 @@ int main()
 		Mat element = getStructuringElement(element_shape, Size(n,n));
 		dilate(red_hue_image, red_hue_image, element);
 
-//		Canny(image, edgeimg, 550, 600);
 
-//		HoughLines(ROIframe, lines, 1, CV_PI / 180, 0, 100);
-//		HoughLines(ROIframe, lines, 1, CV_PI / 180, 150, 0, 0);
-//		HoughLines(edgeimg, lines, 1, CV_PI / 180, 0, 100);
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);
-//		Canny(image, edgeimg, 550, 600);
 
-		t1 = getTickCount();
-//		printf("%d\n",lines.size());
+//		t1 = getTickCount();
 
 		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 		{
-			float a1, a2;
 			float rho = lines[i][0], theta = lines[i][1];
-			float theta1, theta2, theta3;
-			float rho1, rho2, rho3;
+			float theta1, theta2;
+			float rho1, rho2;
 			int length = 800;
 			
 			if (tag == 1)
@@ -110,16 +105,16 @@ int main()
 			{
 				theta1 = theta;
 				rho1 = rho;
-				double a = cos(theta1), b = sin(theta1);
-				double x0 = a*rho1, y0 = b*rho1;
+				double a1 = cos(theta1), b1 = sin(theta1);
+				double x0 = a1*rho1, y0 = b1*rho1;
 
-				pt1.x = cvRound(x0 - length * (-b));
-				pt1.y = cvRound(y0 - length * (a));
-				pt2.x = cvRound(x0 + length * (-b));
-				pt2.y = cvRound(y0 + length * (a));
+				pt1.x = cvRound(x0 - length * (-b1));
+				pt1.y = cvRound(y0 - length * (a1));
+				pt2.x = cvRound(x0 + length * (-b1));
+				pt2.y = cvRound(y0 + length * (a1));
 
-				angle = (atan2(pt1.y - pt2.y, pt1.x - pt2.x))*(180 / CV_PI);
-				printf("floats : %f\n", angle); //printing angle 
+//				angle = (atan2(pt1.y - pt2.y, pt1.x - pt2.x))*(180 / CV_PI);
+//				printf("floats : %f\n", angle); //printing angle 
 
 				tag = 0;
 			}
@@ -136,8 +131,8 @@ int main()
 				pt4.x = cvRound(x02 + length * (-b2));
 				pt4.y = cvRound(y02 + length * (a2));
 
-				angle2 = (atan2(pt3.y - pt4.y, pt3.x - pt4.x))*(180 / CV_PI);
-				printf("floats2 : %f\n", angle2); //printing angle °¢µµÈ®ÀÎÀ» À§ÇÑ ÇÁž°Æ®ÄÚµå 
+//				angle2 = (atan2(pt3.y - pt4.y, pt3.x - pt4.x))*(180 / CV_PI);
+//				printf("floats2 : %f\n", angle2); //printing angle °¢µµÈ®ÀÎÀ» À§ÇÑ ÇÁž°Æ®ÄÚµå 
 
 				tag = 0;
 			}
@@ -180,7 +175,7 @@ int main()
 		else {
 		}
 
-		t2 = getTickCount();
+//		t2 = getTickCount();
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 		imshow("Camera1", image);
@@ -199,7 +194,7 @@ int main()
 /*
 		unsigned char* data = (unsigned char*)img.data;
 
-		t1 = getTickCount();
+//		t1 = getTickCount();
 
 
 		for (i = 0;i < height;i++)
@@ -307,6 +302,7 @@ int main()
 		else if (k == 'f' || k == 'F')
 			do_flip = !do_flip;
 	}
+
 
 */
 
