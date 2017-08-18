@@ -57,13 +57,16 @@ int main()
 	vector<Mat> ROI_planes;
 
 	while (1) {
+printf("1\n");
 		cam.grab();
-		cam.retrieve(image);
+printf("2\n");
+//		cam.retrieve(image);
+printf("3\n");
 		image.copyTo(ROIframe);
-
+printf("4\n");
 		if (do_flip)
 			flip(image, image, -1);
-
+printf("5\n");
 		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);
 		Canny(image, edgeimg, 350, 400);
 

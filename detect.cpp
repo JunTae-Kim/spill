@@ -15,13 +15,14 @@
 #include <string> 
 #include "opencv2/imgproc.hpp" 
 
+
 using namespace std;
 using namespace cv;
 
 int main(int argc, char **argv)
 {
 	Mat frame; //실제 카메라 사용시에는 이 부분만 바꿔주면됨. 
-	raspicam::RaspiCam_Cv Camera; //카메라 사용시 주석해제. 
+	raspicam::RaspiCam_Cv capture; //카메라 사용시 주석해제. 
 
 	int width = 320;
 	int height = 240;
