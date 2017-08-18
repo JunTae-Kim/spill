@@ -19,14 +19,14 @@ using namespace std;
 
 int main()
 {
-	int width = 640;
-	int height = 480;
+	int Width = 320;
+	int Height = 240;
 
 	raspicam::RaspiCam_Cv cam;
 
 	cam.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
-	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
+	cam.set(CV_CAP_PROP_FRAME_WIDTH, Width);
+	cam.set(CV_CAP_PROP_FRAME_HEIGHT, Height);
 
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
@@ -35,36 +35,59 @@ int main()
 
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
+	printf("1point\n");
+
 	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range, red_hue_image, hsv, ROIframe;
 //	int64 t1, t2;
 	bool do_flip = false;
+<<<<<<< HEAD:test1.cpp
 	int tag;
+=======
+	int tag = 0;
+>>>>>>> 968c0d700ace723fce75dc0c579ddd14a9d79891:test2.cpp
 	Point pt1, pt2, pt3, pt4;
 //	float angle, angle2;
 	softPwmCreate(SERVO, 0, 200);
 	softPwmCreate(PWM, 0, 200);
 
+	printf("2point\n");
+
+	pinMode(SERVO, PWM_OUTPUT);
 	pinMode(PWM, PWM_OUTPUT);
 	pinMode(DIR, OUTPUT);
 	pinMode(ENABLE, OUTPUT);
-	pinMode(SERVO, PWM_OUTPUT);
 
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
+
+	printf("3point\n");
 
 	while (1) {
 		cam.grab();
 		cam.retrieve(image);
 		image.copyTo(ROIframe);
 
+printf("h1\n");
 		if (do_flip)
 			flip(image, image, -1);
 
+<<<<<<< HEAD:test1.cpp
 		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);
 		Canny(image, edgeimg, 350, 400);
 
+=======
+printf("h2\n");
+		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);
+printf("h3\n");
+	Canny(image, edgeimg, 350, 400);
+printf("h4\n");
+printf("h4\n");
+printf("h4\n");
+>>>>>>> 968c0d700ace723fce75dc0c579ddd14a9d79891:test2.cpp
 		cvtColor(ROIframe, hsv, CV_BGR2HSV);
 		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);
+
+	printf("4point\n");
 
 		inRange(hsv, Scalar(0, 10, 10), Scalar(15, 255, 255), red_hue_image);
 		inRange(to_hsv1, Scalar(5, 70, 230), Scalar(70, 255, 255), ROIframe);
@@ -77,9 +100,9 @@ int main()
 
 //		t1 = getTickCount();
 
+	printf("5point\n");
 		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 		{
-			float a1, a2;
 			float rho = lines[i][0], theta = lines[i][1];
 			float theta1, theta2;
 			float rho1, rho2;
@@ -101,13 +124,13 @@ int main()
 			{
 				theta1 = theta;
 				rho1 = rho;
-				double a = cos(theta1), b = sin(theta1);
-				double x0 = a*rho1, y0 = b*rho1;
+				double a1 = cos(theta1), b1 = sin(theta1);
+				double x0 = a1*rho1, y0 = b1*rho1;
 
-				pt1.x = cvRound(x0 - length * (-b));
-				pt1.y = cvRound(y0 - length * (a));
-				pt2.x = cvRound(x0 + length * (-b));
-				pt2.y = cvRound(y0 + length * (a));
+				pt1.x = cvRound(x0 - length * (-b1));
+				pt1.y = cvRound(y0 - length * (a1));
+				pt2.x = cvRound(x0 + length * (-b1));
+				pt2.y = cvRound(y0 + length * (a1));
 
 //				angle = (atan2(pt1.y - pt2.y, pt1.x - pt2.x))*(180 / CV_PI);
 //				printf("floats : %f\n", angle); //printing angle 
@@ -134,6 +157,7 @@ int main()
 			}
 		}
 
+	printf("6point\n");
 
 		if (waitKey(30) == 27) {
 			cout << "esc key is pressed by user" << endl;
@@ -144,78 +168,36 @@ int main()
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			if (tag != 1)
-			{
-				printf("forward\n");
-			}
-			softPwmWrite(SERVO, 15);
+			printf("forward\n");
+			softPwmWrite(SERVO, 14);
 			softPwmWrite(PWM, 80);
 			digitalWrite(DIR, LOW);
 			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 1;
 
+
+	printf("7point\n");
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) {
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-			if (tag != 2)
-			{
-				printf("right turn\n");
-			}
+			printf("right turn\n");
+
 			softPwmWrite(SERVO, 18);
 			softPwmWrite(PWM, 100);
 			digitalWrite(DIR, LOW);
 			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 2;
+
+	printf("8point\n");
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0) {
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-
-			if (tag != 3)
-			{
-				printf("left turn\n");
-			}
-			softPwmWrite(SERVO, 12);
-			softPwmWrite(PWM, 100);
-			digitalWrite(DIR, LOW);
-			digitalWrite(ENABLE, LOW);
-			delay(500);
-			tag = 3;
-		}
-
-		else {
-			if (tag != 4)
-			{
-				printf("No detect Line\n");
-
-			}
-			softPwmWrite(PWM, 100);
-			digitalWrite(DIR, HIGH);
-			digitalWrite(ENABLE, LOW);
-			delay(300);
-			tag = 4;
-		}
-
-//		t2 = getTickCount();
-//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
-
-		imshow("Camera1", image);
-		imshow("Camera2", edgeimg);
-
-		int k = waitKey(1);
-		if (k == 27)
-			break;
-		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
-
-	} // While End 
-
-	cam.release();
-	destroyAllWindows();
-
-	return 0;
 }
+}
+}
+
