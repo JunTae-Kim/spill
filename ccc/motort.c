@@ -41,7 +41,7 @@ int main (void)
 	softPwmCreate(SERVO,0,200);
 
 
-	softPwmWrite(SERVO,10);
+	softPwmWrite(SERVO,15);
 	softPwmWrite(PWM,200);
 	digitalWrite(DIR,HIGH);
 	digitalWrite(ENABLE,LOW);

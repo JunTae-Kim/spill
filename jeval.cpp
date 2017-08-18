@@ -10,7 +10,8 @@
 #include <softPwm.h>
 
 #define SERVO 1
-#define RANGE 200
+#define RANGE1 100
+#define RANGE2 200
 #define PWM 21
 #define DIR 22
 #define ENABLE 23
@@ -26,13 +27,13 @@ int main()
 	raspicam::RaspiCam_Cv cam;
 
 	cam.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-	cam.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-	cam.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
+	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
 
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
 		return -1;
-	}
+	}	
 /*
 	CascadeClassifier cascade("haarcascade_frontalface_default.xml");
 
@@ -46,12 +47,19 @@ int main()
 
 	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range, red_hue_image, hsv, ROIframe;
 //	int64 t1, t2;
-	bool do_flip = true;
-	int tag;
+	bool do_flip = false;
+	int tag; int tag2 = 0;
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
-	softPwmCreate(SERVO, 0, RANGE);
 
+	pinMode(PWM,PWM_OUTPUT);
+	pinMode(SERVO,PWM_OUTPUT);
+	pinMode(DIR,OUTPUT);
+	pinMode(ENABLE,OUTPUT);
+
+
+	softPwmCreate(SERVO,0,RANGE1);
+	softPwmCreate(PWM,0,RANGE2);
 
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
@@ -89,7 +97,7 @@ int main()
 			float rho1, rho2;
 			int length = 800;
 			
-			if (tag == 1)
+			if (tag != 0)
 			{
 				pt1.x=0;
 				pt1.y=0;
@@ -147,29 +155,50 @@ int main()
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			printf("forward\n");
+			if (tag2 != 1)
+			{
+				printf("forward\n");
+			}
 			softPwmWrite(SERVO, 15);
-			delay(300);
+			softPwmWrite(PWM, 80);
+			digitalWrite(DIR, LOW);
+			digitalWrite(ENABLE, LOW);
+			delay(500);
 			tag = 1;
+			tag2 = 1;
 
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) { //left 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-			printf("right\n");
+			if (tag2 != 2)
+			{
+				printf("right turn\n");
+			}
 			softPwmWrite(SERVO, 18);
-			delay(300);
-			tag = 1;
+			softPwmWrite(PWM, 100);
+			digitalWrite(DIR, LOW);
+			digitalWrite(ENABLE, LOW);
+			delay(500);
+			tag = 2;
+			tag2 = 2;
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0) { //right 
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			printf("left\n");
+			if (tag2 != 3)
+			{
+				printf("left turn\n");
+			}
 			softPwmWrite(SERVO, 12);
-			delay(300);
-			tag = 1;
+			softPwmWrite(PWM, 100);
+			digitalWrite(DIR, LOW);
+			digitalWrite(ENABLE, LOW);
+			delay(500);
+			tag = 3;
+			tag2 = 3;
 		}
 
 		else {
@@ -305,7 +334,7 @@ int main()
 
 
 */
-
+	digitalWrite(ENABLE, HIGH);
 	cam.release();
 	destroyAllWindows();
 
