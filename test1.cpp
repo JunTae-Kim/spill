@@ -33,12 +33,16 @@ int main()
 		return -1;
 	}
 
+	cout << "Opening Camera..." << endl;
+	if (!cam.isOpened()) { cerr << "Error opening the camera" << endl; return -1; }
+
+
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
 	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range, red_hue_image, hsv, ROIframe;
 //	int64 t1, t2;
 	bool do_flip = false;
-	int tag;
+	int tag; int tag2=0;
 	Point pt1, pt2, pt3, pt4;
 //	float angle, angle2;
 	softPwmCreate(SERVO, 0, 200);
@@ -79,7 +83,6 @@ int main()
 
 		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 		{
-			float a1, a2;
 			float rho = lines[i][0], theta = lines[i][1];
 			float theta1, theta2;
 			float rho1, rho2;
@@ -101,13 +104,13 @@ int main()
 			{
 				theta1 = theta;
 				rho1 = rho;
-				double a = cos(theta1), b = sin(theta1);
-				double x0 = a*rho1, y0 = b*rho1;
+				double a1 = cos(theta1), b1 = sin(theta1);
+				double x0 = a1*rho1, y0 = b1*rho1;
 
-				pt1.x = cvRound(x0 - length * (-b));
-				pt1.y = cvRound(y0 - length * (a));
-				pt2.x = cvRound(x0 + length * (-b));
-				pt2.y = cvRound(y0 + length * (a));
+				pt1.x = cvRound(x0 - length * (-b1));
+				pt1.y = cvRound(y0 - length * (a1));
+				pt2.x = cvRound(x0 + length * (-b1));
+				pt2.y = cvRound(y0 + length * (a1));
 
 //				angle = (atan2(pt1.y - pt2.y, pt1.x - pt2.x))*(180 / CV_PI);
 //				printf("floats : %f\n", angle); //printing angle 
@@ -144,7 +147,7 @@ int main()
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			if (tag != 1)
+			if (tag2 != 1)
 			{
 				printf("forward\n");
 			}
@@ -154,13 +157,14 @@ int main()
 			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 1;
+			tag2 = 1;
 
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) {
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-			if (tag != 2)
+			if (tag2 != 2)
 			{
 				printf("right turn\n");
 			}
@@ -170,12 +174,13 @@ int main()
 			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 2;
+			tag2 = 2;
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0) {
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			if (tag != 3)
+			if (tag2 != 3)
 			{
 				printf("left turn\n");
 			}
@@ -185,10 +190,11 @@ int main()
 			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 3;
+			tag2 = 3;
 		}
 
 		else {
-			if (tag != 4)
+			if (tag2 != 4)
 			{
 				printf("No detect Line\n");
 
@@ -198,6 +204,7 @@ int main()
 			digitalWrite(ENABLE, LOW);
 			delay(300);
 			tag = 4;
+			tag2 = 4;
 		}
 
 //		t2 = getTickCount();
@@ -214,6 +221,7 @@ int main()
 
 	} // While End 
 
+	digitalWrite(ENABLE, HIGH);
 	cam.release();
 	destroyAllWindows();
 
