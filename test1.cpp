@@ -28,7 +28,8 @@ int main()
 	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
 	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
 
-	if (!cam.open()) {
+	if (!cam.open()) 
+	{
 		cerr << "Camera open failed!" << endl;
 		return -1;
 	}
