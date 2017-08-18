@@ -39,7 +39,7 @@ int main()
 	{
 		cam.grab();
 		cam.retrieve(image);									// cam영상에서 찍은 영상프레임들을 image라는 Mat구조체로 불러옴
-		imshow("image",image)
+		imshow("image",image);
 	} // While End 
 
 	cam.release();

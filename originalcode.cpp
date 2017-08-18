@@ -64,7 +64,7 @@ int main()
 
 		Mat element = getStructuringElement(MORPH_RECT, Size(3,3));					//
 		dilate(red_hue_image, red_hue_image, element);
-																
+													
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);						//허프변환
 
 		float angle, angle2;														// 각도?
@@ -102,7 +102,7 @@ int main()
 				double a = cos(theta1), b = sin(theta1);
 				double x0 = a*rho1, y0 = b*rho1;
 
-				pt1.x = cvRound(x0 - length * (-.b));
+				pt1.x = cvRound(x0 - length * (-b));
 				pt1.y = cvRound(y0 - length * (a));
 				pt2.x = cvRound(x0 + length * (-b));
 				pt2.y = cvRound(y0 + length * (a));
