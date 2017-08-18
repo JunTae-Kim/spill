@@ -32,6 +32,12 @@ int main()
 		return 1;
 	}
 
+	if (!cam.open()) 
+	{
+		cerr << "Camera open failed!" << endl;
+		return -1;
+	}
+
 	Mat image, ROIframe, edgeimg;
 	Mat hsv, to_hsv1, red_hue_image;
 
@@ -40,37 +46,37 @@ int main()
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
 
-	softPwmCreate(SERVO, 0, RANGE);
+//	softPwmCreate(SERVO, 0, RANGE);
 
 	while (1)
 	{
 		cam.grab();
 		cam.retrieve(image);									// cam영상에서 찍은 영상프레임들을 image라는 Mat구조체로 불러옴.
-		image.copyTo(ROIframe);									// image에 저장시킨 사진을 ROIframe으로 복사함. 참고) clone() == copyTo()
+//		image.copyTo(ROIframe);									// image에 저장시킨 사진을 ROIframe으로 복사함. 참고) clone() == copyTo()
 
 		if (do_flip)											// 
 		{
 			flip(image, image, -1);								// 영상반전함수 flip
 		}
 
-		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);		// 사진의 가우시안 필터를 거침. GaussianBlur(본사진,수정사진,사이즈,?,?)
+//		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);		// 사진의 가우시안 필터를 거침. GaussianBlur(본사진,수정사진,사이즈,?,?)
 		Canny(image, edgeimg, 550, 600);						// 사진의 엣지를 검출함. Canny(본사진,수정사진,최소,최대)
 																
-		cvtColor(ROIframe, hsv, CV_BGR2HSV);					// 사진의 컬러모형을 변환함. cvtColor(본사진,수정사진,바꾸고자하는 컬러모형)
-		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);				// Hsv컬러모형을 선택함. H=색상, S=채도, V=명도
+//		cvtColor(ROIframe, hsv, CV_BGR2HSV);					// 사진의 컬러모형을 변환함. cvtColor(본사진,수정사진,바꾸고자하는 컬러모형)
+//		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);				// Hsv컬러모형을 선택함. H=색상, S=채도, V=명도
 
-		inRange(hsv, Scalar(0, 10, 10), Scalar(15, 255, 255), red_hue_image);		//임계값을 갖고 hsv사진을 나눈다
-		inRange(to_hsv1, Scalar(5, 70, 230), Scalar(70, 255, 255), ROIframe);
+//		inRange(hsv, Scalar(0, 10, 10), Scalar(15, 255, 255), red_hue_image);		//임계값을 갖고 hsv사진을 나눈다
+//		inRange(to_hsv1, Scalar(5, 70, 230), Scalar(70, 255, 255), ROIframe);
 
-		Mat element = getStructuringElement(MORPH_RECT, Size(3,3));					//
-		dilate(red_hue_image, red_hue_image, element);
+//		Mat element = getStructuringElement(MORPH_RECT, Size(3,3));					//
+//		dilate(red_hue_image, red_hue_image, element);
 													
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);						//허프변환
 
 		float angle, angle2;														// 각도?
 		int i, j, tag;
-		int64 t1, t2;
-		t1 = getTickCount();
+//		int64 t1, t2;
+//		t1 = getTickCount();
 
 		Point pt1, pt2, pt3, pt4;													// 특정픽셀점의 좌표 ptn(x,y) 	
 
@@ -144,7 +150,7 @@ int main()
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
 			printf("forward\n");
-			softPwmWrite(SERVO, 15);
+//			softPwmWrite(SERVO, 15);
 			delay(300);
 			tag = 1;
 
@@ -169,7 +175,7 @@ int main()
 			tag = 1;
 		}
 
-		t2 = getTickCount();						//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
+//		t2 = getTickCount();						//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
@@ -187,4 +193,5 @@ int main()
 	destroyAllWindows();
 
 	return 0;
+
 }
