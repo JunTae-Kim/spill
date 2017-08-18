@@ -39,7 +39,6 @@ int main()
 //	int64 t1, t2;
 	bool do_flip = false;
 	int tag;
-	int n = 3;
 	Point pt1, pt2, pt3, pt4;
 //	float angle, angle2;
 	softPwmCreate(SERVO, 0, 200);
@@ -61,7 +60,7 @@ int main()
 		if (do_flip)
 			flip(image, image, -1);
 
-		GaussianBlur(ROIframe, ROIframe, Size(n, n), 0, 0);
+		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);
 		Canny(image, edgeimg, 350, 400);
 
 		cvtColor(ROIframe, hsv, CV_BGR2HSV);
@@ -71,7 +70,7 @@ int main()
 		inRange(to_hsv1, Scalar(5, 70, 230), Scalar(70, 255, 255), ROIframe);
 
 		int element_shape = MORPH_RECT;
-		Mat element = getStructuringElement(element_shape, Size(n,n));
+		Mat element = getStructuringElement(element_shape, Size(3,3));
 		dilate(red_hue_image, red_hue_image, element);
 
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);
