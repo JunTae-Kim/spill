@@ -90,7 +90,7 @@ int main()
 				double a = cos(theta1), b = sin(theta1);
 				double x0 = a*rho1, y0 = b*rho1;
 
-				pt1.x = cvRound(x0 - length * (-.b));
+				pt1.x = cvRound(x0 - length * (-b));
 				pt1.y = cvRound(y0 - length * (a));
 				pt2.x = cvRound(x0 + length * (-b));
 				pt2.y = cvRound(y0 + length * (a));
