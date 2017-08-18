@@ -32,7 +32,7 @@ int main()
 		return 1;
 	}
 
-	Mat image, ROIframe, edgeimg;
+	Mat image, edgeimg;
 
 	bool do_flip = true;										// 논리형 변수 Bool
 
