@@ -11,21 +11,21 @@
 #include <softPwm.h>
 
 #define SERVO 1
-#define RANGE 100
 
 using namespace cv;
 using namespace std;
 
+
 int main()
 {
-	int width = 320;
-	int height = 240;
+	int width = 640;
+	int height = 480;
 
 	raspicam::RaspiCam_Cv cam;
 
 	cam.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-	cam.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-	cam.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
+	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
 
 	if (wiringPiSetup() == -1)									// 이해 X
 	{
@@ -41,12 +41,13 @@ int main()
 	Mat image, ROIframe, edgeimg;
 	Mat hsv, to_hsv1, red_hue_image;
 
-	bool do_flip = true;										// 논리형 변수 Bool
+	bool do_flip = false;
+	int tag = 0; int tag2 = 0;									// 논리형 변수 Bool
 
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
 
-//	softPwmCreate(SERVO, 0, RANGE);
+	softPwmCreate(SERVO, 0, RANGE);
 
 	while (1)
 	{
@@ -60,7 +61,7 @@ int main()
 		}
 
 //		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);		// 사진의 가우시안 필터를 거침. GaussianBlur(본사진,수정사진,사이즈,?,?)
-		Canny(image, edgeimg, 550, 600);						// 사진의 엣지를 검출함. Canny(본사진,수정사진,최소,최대)
+		Canny(image, edgeimg, 350, 400);						// 사진의 엣지를 검출함. Canny(본사진,수정사진,최소,최대)
 																
 //		cvtColor(ROIframe, hsv, CV_BGR2HSV);					// 사진의 컬러모형을 변환함. cvtColor(본사진,수정사진,바꾸고자하는 컬러모형)
 //		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);				// Hsv컬러모형을 선택함. H=색상, S=채도, V=명도
@@ -73,8 +74,7 @@ int main()
 													
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);						//허프변환
 
-		float angle, angle2;														// 각도?
-		int i, j, tag;
+//		float angle, angle2;														// 각도?
 //		int64 t1, t2;
 //		t1 = getTickCount();
 
@@ -82,14 +82,13 @@ int main()
 
 		for (size_t i = 0; i < lines.size(); i++)									//  
 		{
-			float a1, a2;
 			float rho = lines[i][0], theta = lines[i][1];
-			float theta1, theta2, theta3;
-			float rho1, rho2, rho3;
+			float theta1, theta2;
+			float rho1, rho2;
 
 			int length = 800;
 
-			if (tag == 1)
+			if (tag != 0)
 			{
 				pt1.x = 0;
 				pt1.y = 0;
@@ -105,16 +104,16 @@ int main()
 			{
 				theta1 = theta;
 				rho1 = rho;
-				double a = cos(theta1), b = sin(theta1);
-				double x0 = a*rho1, y0 = b*rho1;
+				double a1 = cos(theta1), b1 = sin(theta1);
+				double x0 = a1*rho1, y0 = b1*rho1;
 
-				pt1.x = cvRound(x0 - length * (-b));
-				pt1.y = cvRound(y0 - length * (a));
-				pt2.x = cvRound(x0 + length * (-b));
-				pt2.y = cvRound(y0 + length * (a));
+				pt1.x = cvRound(x0 - length * (-b1));
+				pt1.y = cvRound(y0 - length * (a1));
+				pt2.x = cvRound(x0 + length * (-b1));
+				pt2.y = cvRound(y0 + length * (a1));
 
-				angle = (atan2(pt1.y - pt2.y, pt1.x - pt2.x))*(180 / CV_PI);
-				printf("floats : %f\n", angle); //printing angle 
+//				angle = (atan2(pt1.y - pt2.y, pt1.x - pt2.x))*(180 / CV_PI);
+//				printf("floats : %f\n", angle); //printing angle 
 
 				tag = 0;
 			}
@@ -131,8 +130,8 @@ int main()
 				pt4.x = cvRound(x02 + length * (-b2));
 				pt4.y = cvRound(y02 + length * (a2));
 
-				angle2 = (atan2(pt3.y - pt4.y, pt3.x - pt4.x))*(180 / CV_PI);
-				printf("floats2 : %f\n", angle2); //printing angle 
+//				angle2 = (atan2(pt3.y - pt4.y, pt3.x - pt4.x))*(180 / CV_PI);
+//				printf("floats2 : %f\n", angle2); //printing angle 
 
 				tag = 0;
 			}
@@ -149,10 +148,14 @@ int main()
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			printf("forward\n");
+			if (tag2 != 1)
+			{
+				printf("forward\n");
+			}
 //			softPwmWrite(SERVO, 15);
-			delay(300);
+//			delay(300);
 			tag = 1;
+			tag2 = 1;
 
 		}
 
@@ -160,19 +163,28 @@ int main()
 		{
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-			printf("right\n");
+			if (tag2 != 2)
+			{
+				printf("right turn\n");
+			}
 
-			delay(300);
-			tag = 1;
+//			delay(300);
+			tag = 2;
+			tag2 = 2;
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0)
 		{
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			printf("left\n");
-			delay(300);
-			tag = 1;
+			if (tag2 != 3)
+			{
+				printf("left turn\n");
+			}
+
+//			delay(300);
+			tag = 3;
+			tag2 = 3;
 		}
 
 //		t2 = getTickCount();						//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
