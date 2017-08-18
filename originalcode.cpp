@@ -37,13 +37,16 @@ int main()
 
 	bool do_flip = true;										// 논리형 변수 Bool
 
+	vector<Vec2f> lines;
+	vector<Mat> ROI_planes;
+
 	softPwmCreate(SERVO, 0, RANGE);
 
 	while (1)
 	{
 		cam.grab();
 		cam.retrieve(image);									// cam영상에서 찍은 영상프레임들을 image라는 Mat구조체로 불러옴.
-		image.copyTo(ROIframe);									// image에 저장시킨 사진을 ROIframe으로 복사함. 참고) clone(0) == copyTo()
+		image.copyTo(ROIframe);									// image에 저장시킨 사진을 ROIframe으로 복사함. 참고) clone() == copyTo()
 
 		if (do_flip)											// 
 		{
@@ -62,19 +65,16 @@ int main()
 		Mat element = getStructuringElement(MORPH_RECT, Size(3,3));					//
 		dilate(red_hue_image, red_hue_image, element);
 																
-		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);		//허프변환
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);						//허프변환
 
-		float angle, angle2;										// 각도?
+		float angle, angle2;														// 각도?
 		int i, j, tag;
 		int64 t1, t2;
 		t1 = getTickCount();
 
-		Point pt1, pt2, pt3, pt4;		// 특정픽셀점의 좌표 
+		Point pt1, pt2, pt3, pt4;													// 특정픽셀점의 좌표 ptn(x,y) 	
 
-		vector<Vec2f> lines;
-		vector<Mat> ROI_planes;
-
-		for (size_t i = 0; i < lines.size(); i++) //  
+		for (size_t i = 0; i < lines.size(); i++)									//  
 		{
 			float a1, a2;
 			float rho = lines[i][0], theta = lines[i][1];
@@ -102,7 +102,7 @@ int main()
 				double a = cos(theta1), b = sin(theta1);
 				double x0 = a*rho1, y0 = b*rho1;
 
-				pt1.x = cvRound(x0 - length * (-b));
+				pt1.x = cvRound(x0 - length * (-.b));
 				pt1.y = cvRound(y0 - length * (a));
 				pt2.x = cvRound(x0 + length * (-b));
 				pt2.y = cvRound(y0 + length * (a));
@@ -169,7 +169,6 @@ int main()
 			tag = 1;
 		}
 
-
 		t2 = getTickCount();						//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 		imshow("Camera1", image);
@@ -178,7 +177,6 @@ int main()
 		int k = waitKey(1);
 		if (k == 27)
 			break;
-
 
 		else if (k == 'f' || k == 'F')
 			do_flip = !do_flip;
