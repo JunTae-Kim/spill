@@ -10,7 +10,9 @@
 #include <softPwm.h>
 
 #define SERVO 1
-#define RANGE 100
+#define PWM 21
+#define DIR 22
+#define ENABLE 23
 
 using namespace cv;
 using namespace std;
@@ -40,7 +42,13 @@ int main()
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
 //	float angle, angle2;
-	softPwmCreate(SERVO, 0, RANGE);
+	softPwmCreate(SERVO, 0, 200);
+	softPwmCreate(PWM, 0, 200);
+
+	pinMode(PWM, PWM_OUTPUT);
+	pinMode(DIR, OUTPUT);
+	pinMode(ENABLE, OUTPUT);
+	pinMode(SERVO, PWM_OUTPUT);
 
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
@@ -142,6 +150,9 @@ int main()
 				printf("forward\n");
 			}
 			softPwmWrite(SERVO, 15);
+			softPwmWrite(PWM, 80);
+			digitalWrite(DIR, LOW);
+			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 1;
 
@@ -152,9 +163,12 @@ int main()
 
 			if (tag != 2)
 			{
-				printf("right\n");
+				printf("right turn\n");
 			}
 			softPwmWrite(SERVO, 18);
+			softPwmWrite(PWM, 100);
+			digitalWrite(DIR, LOW);
+			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 2;
 		}
@@ -164,9 +178,12 @@ int main()
 
 			if (tag != 3)
 			{
-				printf("left\n");
+				printf("left turn\n");
 			}
 			softPwmWrite(SERVO, 12);
+			softPwmWrite(PWM, 100);
+			digitalWrite(DIR, LOW);
+			digitalWrite(ENABLE, LOW);
 			delay(500);
 			tag = 3;
 		}
@@ -175,7 +192,12 @@ int main()
 			if (tag != 4)
 			{
 				printf("No detect Line\n");
+
 			}
+			softPwmWrite(PWM, 100);
+			digitalWrite(DIR, HIGH);
+			digitalWrite(ENABLE, LOW);
+			delay(300);
 			tag = 4;
 		}
 
