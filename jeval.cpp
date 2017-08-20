@@ -51,6 +51,7 @@ int main()
 	int tag; int tag2 = 0;
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
+	float theta1, theta2;
 
 	pinMode(PWM,PWM_OUTPUT);
 	pinMode(SERVO,PWM_OUTPUT);
@@ -93,7 +94,6 @@ int main()
 		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 		{
 			float rho = lines[i][0], theta = lines[i][1];
-			float theta1, theta2;
 			float rho1, rho2;
 			int length = 800;
 			
@@ -159,11 +159,22 @@ int main()
 			{
 				printf("forward\n");
 			}
-			softPwmWrite(SERVO, 15);
-			softPwmWrite(PWM, 80);
+			if (theta1 > 0.79 && theta1 < 0.83) {
+				softPwmWrite(SERVO, 15);
+				printf("15, theta1 : %f\n",theta1);
+			}
+			else if (theta1 <= 0.79) {
+				softPwmWrite(SERVO, 14);
+				printf("14, theta1 : %f\n",theta1);
+			}
+			else if (theta1 >= 0.83) {
+				softPwmWrite(SERVO, 16);
+				printf("16, theta1 : %f\n",theta1);
+			}
+
+			softPwmWrite(PWM, 50);
 			digitalWrite(DIR, LOW);
 			digitalWrite(ENABLE, LOW);
-			delay(500);
 			tag = 1;
 			tag2 = 1;
 
@@ -174,13 +185,27 @@ int main()
 
 			if (tag2 != 2)
 			{
-				printf("right turn\n");
+				printf("right turn\ntheta1 : %f\n",theta1);
 			}
-			softPwmWrite(SERVO, 18);
-			softPwmWrite(PWM, 100);
+			if (theta1 > 0.79 && theta1 < 0.83) {
+				softPwmWrite(SERVO, 16);
+				printf("right, theta1 : %f\n",theta1);
+			}
+			else if (theta1 <= 0.79) {
+				softPwmWrite(SERVO, 17);
+				printf("right, theta1 : %f\n",theta1);
+			}
+			else if (theta1 >= 0.83) {
+				softPwmWrite(SERVO, 15);
+				printf("right, theta1 : %f\n",theta1);
+			}
+//			else
+//				softPwmWrite(SERVO, 18);
+
+			softPwmWrite(PWM, 70);
 			digitalWrite(DIR, LOW);
 			digitalWrite(ENABLE, LOW);
-			delay(500);
+//			delay(500);
 			tag = 2;
 			tag2 = 2;
 		}
@@ -190,13 +215,27 @@ int main()
 
 			if (tag2 != 3)
 			{
-				printf("left turn\n");
+				printf("left turn\ntheta1 : %f\n", theta1);
 			}
-			softPwmWrite(SERVO, 12);
-			softPwmWrite(PWM, 100);
+			if (theta2 > 2.3 && theta2 < 2.6) {
+				softPwmWrite(SERVO, 14);
+				printf("left, theta2 : %f\n",theta2);
+			}
+			else if (theta2 <= 2.3) {
+				softPwmWrite(SERVO, 16);
+				printf("left, theta2 : %f\n",theta2);
+			}
+			else if (theta2 >= 2.6) {
+				softPwmWrite(SERVO, 10);
+				printf("left, theta2 : %f\n",theta2);
+			}
+//			else
+//				softPwmWrite(SERVO, 12);
+
+			softPwmWrite(PWM, 70);
 			digitalWrite(DIR, LOW);
 			digitalWrite(ENABLE, LOW);
-			delay(500);
+//			delay(500);
 			tag = 3;
 			tag2 = 3;
 		}
@@ -206,7 +245,7 @@ int main()
 
 //		t2 = getTickCount();
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
-
+	
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
 

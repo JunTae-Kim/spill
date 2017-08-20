@@ -42,18 +42,18 @@ int main (void)
 
 
 	softPwmWrite(SERVO,15);
-	softPwmWrite(PWM,200);
-	digitalWrite(DIR,HIGH);
-	digitalWrite(ENABLE,LOW);
-	digitalWrite(LEDT,HIGH);
-	delay(2000);
-/*
-	softPwmWrite(PWM, 190);
+	softPwmWrite(PWM,50);
 	digitalWrite(DIR,LOW);
 	digitalWrite(ENABLE,LOW);
-	digitalWrite(LEDT,HIGH);
-	delay(2000);
+//	digitalWrite(LEDT,HIGH);
+	delay(5000);
 
+	softPwmWrite(PWM, 50);
+	digitalWrite(DIR,HIGH);
+	digitalWrite(ENABLE,LOW);
+//	digitalWrite(LEDT,HIGH);
+	delay(5000);
+/*
 	softPwmWrite(PWM, 200);
 	digitalWrite(DIR,HIGH);
 	digitalWrite(ENABLE,LOW);
