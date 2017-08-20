@@ -1,3 +1,5 @@
+/*
+
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <raspicam/raspicam_cv.h>
@@ -37,7 +39,7 @@ int main()
 		cerr << "Failed to open xml file!" << endl;
 		return -1;
 	}
-*/
+
 
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
@@ -47,14 +49,15 @@ int main()
 	int i, j, tag;
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
-	float angle, angle2;
+	float angle, angle2;sdf
 	softPwmCreate(SERVO, 0, RANGE);
 
 
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
 
-	while (1) {
+	while (1)
+	{
 		cam.grab();
 		cam.retrieve(image);
 		image.copyTo(ROIframe);
@@ -75,16 +78,12 @@ int main()
 		Mat element = getStructuringElement(element_shape, Size(n,n));
 		dilate(red_hue_image, red_hue_image, element);
 
-//		Canny(image, edgeimg, 550, 600);
 
-//		HoughLines(ROIframe, lines, 1, CV_PI / 180, 0, 100);
-//		HoughLines(ROIframe, lines, 1, CV_PI / 180, 150, 0, 0);
-//		HoughLines(edgeimg, lines, 1, CV_PI / 180, 0, 100);
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);
-//		Canny(image, edgeimg, 550, 600);
+
 
 		t1 = getTickCount();
-//		printf("%d\n",lines.size());
+
 
 		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 		{
@@ -196,122 +195,11 @@ int main()
 
 
 
-/*
-		unsigned char* data = (unsigned char*)img.data;
 
-		t1 = getTickCount();
-
-
-		for (i = 0;i < height;i++)
-		{
-			for (j = 0;j < width;j++)
-			{
-				if (data[i*width + j] > 110)
-				{
-					data[i*width + j] = 255;
-
-					if (j==319 && i>160)
-					{
-						data[i*width + j] = 0;
-					}
-				}
-	
-				else
-				{
-					data[i*width + j] = 0;
-					
-					if (j==319 && i>160)
-					{
-						data[i*width + j] = 255;
-					}
-				}
-			}
-		}
-
-		img.data=data;
-		Canny(img, edgeimg, 600, 750);
-
-		for (i=0;i<width;i++)
-		{
-			if (data[200*width + i] == 255)
-			{
-				break;
-			}
-		}
-
-		for (j=width;j>0;j--)
-		{
-			if (data[200*width + j] == 255)
-			{
-				break;
-			}
-		}
-
-		middot1 = (int)((i+j) / 2);
-
-		for (i=0;i<width;i++)
-		{
-			if (data[300*width + i] == 255)
-			{
-				break;
-			}
-		}
-
-		for (j=width;j>0;j--)
-		{
-			if (data[300*width + j] == 255)
-			{
-				break;
-			}
-		}
-
-		middot2 = (int)((i+j) / 2);
-
-		dir = middot2 - middot1; 
-
-		if (abs(dir) < 30)
-		{
-			printf("go on\n");
-		}
-		else if (30<=dir && dir<=50)
-		{
-			printf("left turn\n");
-		}
-		else if (dir>50)
-		{
-			printf("strong left turn\n");
-		}
-		else if (-50<=dir && dir<=-30)
-		{
-			printf("right turn\n");
-		}
-		else if (dir<-50)
-		{
-			printf("strong right turn\n");
-		}
-		else
-		{
-			printf("error\n");
-		}
-
-		t2 = getTickCount();
-		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
-
-		imshow("cam", img);
-		imshow("cam2", edgeimg);
-
-
-		int k = waitKey(1);
-		if (k == 27)
-			break;
-		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
-	}
-
-*/
 
 	cam.release();
 	destroyAllWindows();
 
 	return 0;
 }
+*/
