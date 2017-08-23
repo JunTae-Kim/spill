@@ -34,6 +34,11 @@ int main()
 
 	VideoWriter oVideoWriter("/home/pi/spill/test.avi",CV_FOURCC('M','P','4','2'),fps,framesize, true);
 
+	if (!oVideoWriter.isOpened())
+	{
+		cout << "ERROR : failed to write the video" << endl;
+	}
+
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
 		return -1;
@@ -273,7 +278,9 @@ int main()
 
 //		t2 = getTickCount();
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
-	
+
+		oVideoWriter.write(image);
+
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
 

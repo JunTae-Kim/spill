@@ -31,28 +31,6 @@ int main (void)
 	pinMode(ENABLE,OUTPUT);
 	pinMode(SERVO,PWM_OUTPUT);
 	}
-	void loop(){
-	get_HC_SRO4();
-
-	if(distance<30){
-	serial,println("stop")
-	get_back();
-}
-	while(1){
-	digitalWrite(trig,LOW);
-	delay(500);
-	digitalWrite(trig,HIGH);
-	delayMicroseconds(10);
-	digitalWrite(trig,LOW);
-	while(digitalRead(echo) == 0);
-	start_time = micros();
-	while(digitalRead(echo) == 1);
-	end_time = micros();
-	distance = (end_time - start_time) / 29. / 2.;
-	printf("distance %.2f cm\n", distance);
-	}
-	return 0;
-}
 
 
 

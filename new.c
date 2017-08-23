@@ -1,6 +1,6 @@
 #include<stdio.h>
 #include<wiringPi.h>
-
+#include<softPwm.h>
 
 
 #define PWM 21
@@ -49,6 +49,9 @@ int distance = travelTime/58;
 
 printf("distance;%dcm\n", distance);
 delay(100);
+
+softPwmCreate(PWM,0,100);
+softPwmCreate(SERVO,0,200);
 
 digitalWrite(PWM, HIGH);
 digitalWrite(DIR, LOW);
