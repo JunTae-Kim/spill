@@ -172,7 +172,7 @@ int main()
 				printf("16, theta1 : %f\n",theta1);
 			}
 
-			softPwmWrite(PWM, 50);
+			softPwmWrite(PWM, 100);
 			digitalWrite(DIR, LOW);
 			digitalWrite(ENABLE, LOW);
 			tag = 1;
@@ -189,15 +189,12 @@ int main()
 			}
 			if (theta1 > 0.79 && theta1 < 0.83) {
 				softPwmWrite(SERVO, 16);
-				printf("right, theta1 : %f\n",theta1);
 			}
 			else if (theta1 <= 0.79) {
 				softPwmWrite(SERVO, 17);
-				printf("right, theta1 : %f\n",theta1);
 			}
 			else if (theta1 >= 0.83) {
 				softPwmWrite(SERVO, 15);
-				printf("right, theta1 : %f\n",theta1);
 			}
 //			else
 //				softPwmWrite(SERVO, 18);
