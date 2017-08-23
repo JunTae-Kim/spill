@@ -53,19 +53,20 @@ delay(100);
 softPwmCreate(PWM,0,100);
 softPwmCreate(SERVO,0,200);
 
-digitalWrite(PWM, HIGH);
-digitalWrite(DIR, LOW);
-digitalWrite(ENABLE, HIGH);
-digitalWrite(SERVO, LOW);
-
-if(distance<=30)
-{
-digitalWrite(PWM, LOW);
+softPwmCreate(SERVO, 15);
+softPwmCreate(PWM, 50);
 digitalWrite(DIR, LOW);
 digitalWrite(ENABLE, LOW);
-digitalWrite(SERVO, LOW);
 delay(1000);
-}
+
+
+
+/*
+digitalWrite(PWM, HIGH);
+digitalWrite(DIR, HIGH);
+digitalWrite(ENABLE, HIGH);
+digitalWrite(SERVO, LOW);
+*/
 }
 }
 

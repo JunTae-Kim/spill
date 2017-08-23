@@ -58,11 +58,11 @@ int main (void)
 	digitalWrite(DIR,HIGH);
 	digitalWrite(ENABLE,LOW);
 	digitalWrite(LEDT,HIGH);
-
 	delay(2000);
 */
 
 	//stop
+printf("aaa\n");
 	softPwmWrite(SERVO, 0);
 	digitalWrite(DIR,HIGH);
 	digitalWrite(ENABLE,HIGH);

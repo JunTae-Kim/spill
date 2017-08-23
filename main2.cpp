@@ -32,11 +32,12 @@ int main()
 	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
 	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
 
-	VideoWriter oVideoWriter("/home/pi/spill/test.avi",CV_FOURCC('P','I','M','1'),fps,framesize, true);
+	VideoWriter oVideoWriter("/home/pi/spill/test1.avi",CV_FOURCC('P','I','M','1'),fps,framesize, true);
 
 	if (!oVideoWriter.isOpened())
 	{
 		cout << "ERROR : failed to write the video" << endl;
+		return -1;
 	}
 
 	if (!cam.open()) {
