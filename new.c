@@ -1,40 +1,42 @@
 #include<stdio.h>
 #include<wiringPi.h>
 
-/*
+
 
 #define PWM 21
 #define DIR 22
 #define ENABLE 23
 #define SERVO 1
-*/
 #define trigPin 4
 #define echoPin 5
 
 int main(void)
 {
+/*
 int distance=0;
 int pulse=0;
+*/
 if(wiringPiSetup() == -1)
 return 1;
-/*
+
 pinMode(PWM, OUTPUT);
 pinMode(DIR, OUTPUT);
 pinMode(ENABLE, OUTPUT);
 pinMode(SERVO, OUTPUT);
-*/
-pinMode(trigPin, INPUT);
-pinMode(echoPin, OUTPUT);
 
-for(;;)
+pinMode(trigPin, OUTPUT);
+pinMode(echoPin, INPUT);
+
 /*
-while(1)
+for(;;)
 */
+
+while(1)
 {
 digitalWrite(trigPin, LOW);
-usleep(2);
+delay(500);
 digitalWrite(trigPin, HIGH);
-usleep(20);
+delayMicroseconds(10);
 digitalWrite(trigPin, LOW);
 
 while(digitalRead(echoPin) == LOW);
@@ -47,7 +49,7 @@ int distance = travelTime/58;
 
 printf("distance;%dcm\n", distance);
 delay(100);
-/*
+
 digitalWrite(PWM, HIGH);
 digitalWrite(DIR, LOW);
 digitalWrite(ENABLE, HIGH);
@@ -59,9 +61,8 @@ digitalWrite(PWM, LOW);
 digitalWrite(DIR, LOW);
 digitalWrite(ENABLE, LOW);
 digitalWrite(SERVO, LOW);
-delay(5000);
+delay(1000);
 }
-*/
 }
 }
 
