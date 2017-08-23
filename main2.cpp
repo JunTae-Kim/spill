@@ -23,12 +23,16 @@ int main()
 {
 	int width = 320;
 	int height = 240;
+	int fps = 15;
+	Size framesize(width, height);
 
 	raspicam::RaspiCam_Cv cam;
 
 	cam.set(CV_CAP_PROP_FORMAT, CV_8UC3);
 	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
 	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
+
+	VideoWriter oVideoWriter("/home/pi/spill/test.mp4",CV_FOURCC('M','J','P','G'),fps,framesize, true);
 
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
@@ -38,7 +42,7 @@ int main()
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
 	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range;
-	Mat red_hue_image, hsv, ROIframe;
+	Mat red_hue_image, hsv, ROIframe, ROIimg, mask;
 //	int64 t1, t2;
 	bool do_flip = false;
 	int tag; int tag2 = 0;
@@ -61,26 +65,28 @@ int main()
 	while (1) {
 		cam.grab();
 		cam.retrieve(image);
-		image.copyTo(ROIframe);
 
-		if (do_flip)
-			flip(image, image, -1);
+		cvtColor(image, image, CV_BGR2GRAY);
+		GaussianBlur(image, image, Size(3, 3), 0, 0);
+		Canny(image, edgeimg, 300, 350);
 
-		GaussianBlur(ROIframe, ROIframe, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 350, 400);
+//		cvtColor(ROIframe, hsv, CV_BGR2HSV);
+//		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);
 
-		cvtColor(ROIframe, hsv, CV_BGR2HSV);
-		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);
+//		inRange(hsv, Scalar(0, 10, 10), Scalar(15, 255, 255), red_hue_image);
+//		inRange(to_hsv1, Scalar(5, 70, 230), Scalar(70, 255, 255), ROIframe);
 
-		inRange(hsv, Scalar(0, 10, 10), Scalar(15, 255, 255), red_hue_image);
-		inRange(to_hsv1, Scalar(5, 70, 230), Scalar(70, 255, 255), ROIframe);
+//		int element_shape = MORPH_RECT;
+//		Mat element = getStructuringElement(element_shape, Size(n,n));
+//		dilate(red_hue_image, red_hue_image, element);
 
-		int element_shape = MORPH_RECT;
-		Mat element = getStructuringElement(element_shape, Size(n,n));
-		dilate(red_hue_image, red_hue_image, element);
+//		vertices = array([[(50, height), (width/2-45, height/2+60), (width/2+45, height/2+60), (width-50, height)]]);
 
+//		mask = edgeimg;
+//		fillPoly(mask, vertices, Scalar(255,255,255));
+		
 
-		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 30, 10, 20);
 
 //		t1 = getTickCount();
 
@@ -149,11 +155,11 @@ int main()
 				printf("15, theta1 : %f\n",theta1);
 			}
 			else if (theta1 <= 0.79) {
-				softPwmWrite(SERVO, 14);
+				softPwmWrite(SERVO, 16);
 				printf("14, theta1 : %f\n",theta1);
 			}
 			else if (theta1 >= 0.83) {
-				softPwmWrite(SERVO, 16);
+				softPwmWrite(SERVO, 14);
 				printf("16, theta1 : %f\n",theta1);
 			}
 
@@ -217,9 +223,53 @@ int main()
 			tag = 3;
 			tag2 = 3;
 		}
-
+/*
 		else {
+			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+
+			if ((theta1 > 0.79 && theta1 < 0.83) || (theta2 > 2.3 && theta2 < 2.6)) {
+				printf("forword\n");
+				softPwmWrite(SERVO, 15);
+				softPwmWrite(PWM, 70);
+				printf("15, theta1 : %f, theta2 : %f\n",theta1, theta2);
+			}
+			else if (theta1 >= 0.7 && theta1 <= 0.79) {
+				softPwmWrite(SERVO, 14);
+				softPwmWrite(PWM, 60);
+				printf("14, theta1 : %f, theta2 : %f\n",theta1, theta2);
+			}
+			else if (theta2 <= 2.8 && theta2 >= 2.6) {
+				softPwmWrite(SERVO, 16);
+				softPwmWrite(PWM, 60);
+				printf("16, theta1 : %f, theta2 : %f\n",theta1, theta2);
+			}
+			else if ((theta1 >= 0.5 && theta1 < 0.7) || (theta2 <= 2.6 && theta2 > 2.5))	{
+				softPwmWrite(SERVO, 13);
+				softPwmWrite(PWM, 50);
+				printf("13, theta1 : %f, theta2 : %f\n",theta1, theta2);
+			}
+			else if ((theta1 >= 0.3 && theta1 < 0.5) || (theta2 <= 2.6 && theta2 > 2.4))	{
+				softPwmWrite(SERVO, 12);
+				softPwmWrite(PWM, 40);
+				printf("12, theta1 : %f, theta2 : %f\n",theta1, theta2);
+			}
+			else if (theta1 < 0.3 || (theta2 > 2.4))	{
+				softPwmWrite(SERVO, 11);
+				softPwmWrite(PWM, 40);
+				printf("11, theta1 : %f, theta2 : %f\n",theta1, theta2);
+			}
+			else if (theta2 > 2.7) {
+				softPwmWrite(SERVO, 17);
+				softPwmWrite(PWM, 50);
+				printf("17, theta1 : %f, theta2 : %f\n",theta1, theta2);
+			}
+
+			digitalWrite(DIR, LOW);
+			digitalWrite(ENABLE, LOW);
+
 		}
+*/
 
 //		t2 = getTickCount();
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
