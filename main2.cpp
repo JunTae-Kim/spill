@@ -23,7 +23,7 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-	int fps = 15;
+	int fps = 20;
 	Size framesize(width, height);
 
 	raspicam::RaspiCam_Cv cam;
@@ -32,7 +32,7 @@ int main()
 	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
 	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
 
-	VideoWriter oVideoWriter("/home/pi/spill/test.mp4",CV_FOURCC('M','J','P','G'),fps,framesize, true);
+	VideoWriter oVideoWriter("/home/pi/spill/test.avi",CV_FOURCC('P','I','M','1'),fps,framesize, true);
 
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
