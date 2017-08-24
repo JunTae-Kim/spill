@@ -46,13 +46,13 @@ int main (void)
 	digitalWrite(DIR,LOW);
 	digitalWrite(ENABLE,LOW);
 //	digitalWrite(LEDT,HIGH);
-	delay(5000);
+	delay(1000);
 
 	softPwmWrite(PWM, 50);
 	digitalWrite(DIR,HIGH);
 	digitalWrite(ENABLE,LOW);
 //	digitalWrite(LEDT,HIGH);
-	delay(5000);
+	delay(1000);
 /*
 	softPwmWrite(PWM, 200);
 	digitalWrite(DIR,HIGH);

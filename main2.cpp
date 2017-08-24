@@ -15,6 +15,11 @@
 #define PWM 21
 #define DIR 22
 #define ENABLE 23
+#define pi 3.141592
+#define standard_L 40
+#define standard_R 130
+#define standard 15
+
 
 using namespace cv;
 using namespace std;
@@ -23,7 +28,8 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-	int fps = 20;
+	int value = 0;
+	int thetaR, thetaL;
 	Size framesize(width, height);
 
 	raspicam::RaspiCam_Cv cam;
@@ -31,14 +37,6 @@ int main()
 	cam.set(CV_CAP_PROP_FORMAT, CV_8UC3);
 	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
 	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
-
-	VideoWriter oVideoWriter("/home/pi/spill/test1.avi",CV_FOURCC('P','I','M','1'),fps,framesize, true);
-
-	if (!oVideoWriter.isOpened())
-	{
-		cout << "ERROR : failed to write the video" << endl;
-		return -1;
-	}
 
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
@@ -48,7 +46,7 @@ int main()
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
 	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range;
-	Mat red_hue_image, hsv, ROIframe, ROIimg, mask;
+	Mat red_hue_image, hsv, ROIframe, ROIimg;
 //	int64 t1, t2;
 	bool do_flip = false;
 	int tag; int tag2 = 0;
@@ -74,25 +72,13 @@ int main()
 
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 300, 350);
 
-//		cvtColor(ROIframe, hsv, CV_BGR2HSV);
-//		cvtColor(ROIframe, to_hsv1, CV_BGR2HSV);
+		Rect rect(0, 60, 320, 120);
+		Mat subimg = image(rect);
 
-//		inRange(hsv, Scalar(0, 10, 10), Scalar(15, 255, 255), red_hue_image);
-//		inRange(to_hsv1, Scalar(5, 70, 230), Scalar(70, 255, 255), ROIframe);
+		Canny(subimg, edgeimg, 300, 350);
 
-//		int element_shape = MORPH_RECT;
-//		Mat element = getStructuringElement(element_shape, Size(n,n));
-//		dilate(red_hue_image, red_hue_image, element);
-
-//		vertices = array([[(50, height), (width/2-45, height/2+60), (width/2+45, height/2+60), (width-50, height)]]);
-
-//		mask = edgeimg;
-//		fillPoly(mask, vertices, Scalar(255,255,255));
-		
-
-		HoughLines(edgeimg, lines, 1, CV_PI / 180, 30, 10, 20);
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 50, 0, 0);
 
 //		t1 = getTickCount();
 
@@ -143,145 +129,69 @@ int main()
 			}
 		}
 
+		theta1 = 1.57 - theta1;
+		theta2 = 4.71 - theta2;
+		thetaL = theta1 * 180/pi;
+		thetaR = theta2 * 180/pi;
+
 
 		if (waitKey(30) == 27) {
 			cout << "esc key is pressed by user" << endl;
 		}
 
 		else if (pt1.x != 0 && pt3.x != 0) { //forward 
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-
-			if (tag2 != 1)
-			{
-				printf("forward\n");
-			}
-			if (theta1 > 0.79 && theta1 < 0.83) {
-				softPwmWrite(SERVO, 15);
-				printf("15, theta1 : %f\n",theta1);
-			}
-			else if (theta1 <= 0.79) {
-				softPwmWrite(SERVO, 16);
-				printf("14, theta1 : %f\n",theta1);
-			}
-			else if (theta1 >= 0.83) {
-				softPwmWrite(SERVO, 14);
-				printf("16, theta1 : %f\n",theta1);
-			}
-
-			softPwmWrite(PWM, 50);
-			digitalWrite(DIR, LOW);
-			digitalWrite(ENABLE, LOW);
-			tag = 1;
-			tag2 = 1;
-
+			line(subimg, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+			line(subimg, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+			value = floor((thetaR-standard_R+2)/4);
+			printf("!!!both lines : %d\n", value);
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) { //left 
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-
-			if (tag2 != 2)
-			{
-				printf("right turn\ntheta1 : %f\n",theta1);
-			}
-			if (theta1 > 0.79 && theta1 < 0.83) {
-				softPwmWrite(SERVO, 16);
-				printf("right, theta1 : %f\n",theta1);
-			}
-			else if (theta1 <= 0.79) {
-				softPwmWrite(SERVO, 17);
-				printf("right, theta1 : %f\n",theta1);
-			}
-			else if (theta1 >= 0.83) {
-				softPwmWrite(SERVO, 15);
-				printf("right, theta1 : %f\n",theta1);
-			}
-
-			softPwmWrite(PWM, 70);
-			digitalWrite(DIR, LOW);
-			digitalWrite(ENABLE, LOW);
-			tag = 2;
-			tag2 = 2;
+			line(subimg, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+			value = -floor((standard_L-thetaL+2)/4);
+			printf("left lines : %d\n", value);
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0) { //right 
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-
-			if (tag2 != 3)
-			{
-				printf("left turn\ntheta1 : %f\n", theta1);
-			}
-			if (theta2 > 2.3 && theta2 < 2.6) {
-				softPwmWrite(SERVO, 14);
-				printf("left, theta2 : %f\n",theta2);
-			}
-			else if (theta2 <= 2.3) {
-				softPwmWrite(SERVO, 16);
-				printf("left, theta2 : %f\n",theta2);
-			}
-			else if (theta2 >= 2.6) {
-				softPwmWrite(SERVO, 10);
-				printf("left, theta2 : %f\n",theta2);
-			}
-			softPwmWrite(PWM, 70);
-			digitalWrite(DIR, LOW);
-			digitalWrite(ENABLE, LOW);
-			tag = 3;
-			tag2 = 3;
+			line(subimg, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+			value = floor((thetaR-standard_R+2)/4);
+			printf("right lines : %d\n", value);
 		}
 /*
-		else {
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-
-			if ((theta1 > 0.79 && theta1 < 0.83) || (theta2 > 2.3 && theta2 < 2.6)) {
-				printf("forword\n");
-				softPwmWrite(SERVO, 15);
-				softPwmWrite(PWM, 70);
-				printf("15, theta1 : %f, theta2 : %f\n",theta1, theta2);
-			}
-			else if (theta1 >= 0.7 && theta1 <= 0.79) {
-				softPwmWrite(SERVO, 14);
-				softPwmWrite(PWM, 60);
-				printf("14, theta1 : %f, theta2 : %f\n",theta1, theta2);
-			}
-			else if (theta2 <= 2.8 && theta2 >= 2.6) {
-				softPwmWrite(SERVO, 16);
-				softPwmWrite(PWM, 60);
-				printf("16, theta1 : %f, theta2 : %f\n",theta1, theta2);
-			}
-			else if ((theta1 >= 0.5 && theta1 < 0.7) || (theta2 <= 2.6 && theta2 > 2.5))	{
-				softPwmWrite(SERVO, 13);
-				softPwmWrite(PWM, 50);
-				printf("13, theta1 : %f, theta2 : %f\n",theta1, theta2);
-			}
-			else if ((theta1 >= 0.3 && theta1 < 0.5) || (theta2 <= 2.6 && theta2 > 2.4))	{
-				softPwmWrite(SERVO, 12);
-				softPwmWrite(PWM, 40);
-				printf("12, theta1 : %f, theta2 : %f\n",theta1, theta2);
-			}
-			else if (theta1 < 0.3 || (theta2 > 2.4))	{
-				softPwmWrite(SERVO, 11);
-				softPwmWrite(PWM, 40);
-				printf("11, theta1 : %f, theta2 : %f\n",theta1, theta2);
-			}
-			else if (theta2 > 2.7) {
-				softPwmWrite(SERVO, 17);
-				softPwmWrite(PWM, 50);
-				printf("17, theta1 : %f, theta2 : %f\n",theta1, theta2);
-			}
-
-			digitalWrite(DIR, LOW);
-			digitalWrite(ENABLE, LOW);
-
+		if ((theta1 > 0.66 && theta1 < 0.83) || (theta2 > 2.2 && theta2 < 2.3)) {
+			softPwmWrite(SERVO, 15);
+			printf("15, theta1 : %f theta2 : %f\n",theta1, theta2);
+			delay(100);
+		}
+		else if (theta1 <= 0.66) {
+			softPwmWrite(SERVO, 16);
+			printf("16, theta1 : %f theta2 : %f\n",theta1, theta2);
+			delay(100);
+		}
+		else if (theta1 >= 0.83 || theta2 >= 2.3) {
+			softPwmWrite(SERVO, 14);
+			printf("14, theta1 : %f theta2 : %f\n",theta1, theta2);
+			delay(100);
 		}
 */
+		if (value > 5) {
+			value = 5;
+		}
+		else if (value < -6) {
+			value = -6;
+		}
+		softPwmWrite(SERVO, (standard+value));
+		softPwmWrite(PWM, 80);
+		digitalWrite(DIR, LOW);
+		digitalWrite(ENABLE, LOW);
+		delay(300);
+		tag = 1;
+
 
 //		t2 = getTickCount();
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
-		oVideoWriter.write(image);
-
+		imshow("CAM", subimg);
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
 

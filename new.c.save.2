@@ -34,7 +34,7 @@ for(;;)
 	while(1)
 {
 	digitalWrite(trigPin, LOW);
-	delay(200);
+	delay(500);
 	digitalWrite(trigPin, HIGH);
 	delayMicroseconds(10);
 	digitalWrite(trigPin, LOW);
@@ -48,30 +48,27 @@ for(;;)
 	int distance = travelTime/58;
 
 	printf("distance;%dcm\n", distance);
-	delay(5);
+	delay(100);
 
 	softPwmCreate(PWM,0,100);
 	softPwmCreate(SERVO,0,200);
 
-	softPwmWrite(SERVO,100);
-	softPwmWrite(PWM, 50);
+	softPwmCreate(SERVO, 15);
+	softPwmCreate(PWM, 50);
 	digitalWrite(DIR, LOW);
 	digitalWrite(ENABLE, LOW);
+	delay(1000);
 
-/*
 	softPwmWrite(PWM, 50);
 	digitalWrite(DIR, HIGH);
 	digitalWrite(ENABLE, LOW);
 	delay(1000);
-*/
 
-	if(distance<=50)
-{
 	softPwmWrite(SERVO, 0);
 	digitalWrite(DIR, HIGH);
 	digitalWrite(ENABLE, HIGH);
-	
-}
+
+	return 0;
 }
 }
 
