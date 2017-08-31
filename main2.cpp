@@ -16,8 +16,8 @@
 #define DIR 22
 #define ENABLE 23
 #define pi 3.141592
-#define standard_L 40
-#define standard_R 130
+#define standard_L 55
+#define standard_R 125
 #define standard 15
 
 
@@ -29,7 +29,7 @@ int main()
 	int width = 320;
 	int height = 240;
 	int value = 0;
-	int thetaR, thetaL;
+	float thetaR, thetaL;
 	Size framesize(width, height);
 
 	raspicam::RaspiCam_Cv cam;
@@ -52,7 +52,7 @@ int main()
 	int tag; int tag2 = 0;
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
-	float theta1, theta2;
+	float theta1 = 0; float theta2 = 0;
 
 	pinMode(PWM,PWM_OUTPUT);
 	pinMode(SERVO,PWM_OUTPUT);
@@ -73,12 +73,12 @@ int main()
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
 
-		Rect rect(0, 60, 320, 120);
+		Rect rect(0, 100, 320, 120);
 		Mat subimg = image(rect);
 
-		Canny(subimg, edgeimg, 300, 350);
+		Canny(subimg, edgeimg, 320, 350);
 
-		HoughLines(edgeimg, lines, 1, CV_PI / 180, 50, 0, 0);
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 60, 0, 0);
 
 //		t1 = getTickCount();
 
@@ -140,23 +140,33 @@ int main()
 		}
 
 		else if (pt1.x != 0 && pt3.x != 0) { //forward 
-			line(subimg, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-			line(subimg, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-			value = floor((thetaR-standard_R+2)/4);
-			printf("!!!both lines : %d\n", value);
+			line(subimg, pt1, pt2, Scalar(255, 0, 0), 4, CV_AA);
+			line(subimg, pt3, pt4, Scalar(0, 0, 255), 4, CV_AA);
+//			value = floor(abs((thetaR-standard_R)/2));
+			value = 0;
+			softPwmWrite(PWM, 50);
+			if (thetaL <= 30)
+			{
+				value = floor(abs((thetaL-standard_L)/3.5));
+			}
+			printf("!!!!!both lines : %d\n", value);
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) { //left 
-			line(subimg, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-			value = -floor((standard_L-thetaL+2)/4);
+			line(subimg, pt1, pt2, Scalar(255, 0, 0), 4, CV_AA);
+			value = floor(abs((standard_L-thetaL)/3.5));
 			printf("left lines : %d\n", value);
+			softPwmWrite(PWM, 80);
+
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0) { //right 
-			line(subimg, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-			value = floor((thetaR-standard_R+2)/4);
+			line(subimg, pt3, pt4, Scalar(0, 0, 255), 4, CV_AA);
+			value = -floor(abs((thetaR-standard_R)/3.5));
 			printf("right lines : %d\n", value);
+			softPwmWrite(PWM, 80);
 		}
+
 /*
 		if ((theta1 > 0.66 && theta1 < 0.83) || (theta2 > 2.2 && theta2 < 2.3)) {
 			softPwmWrite(SERVO, 15);
@@ -174,6 +184,11 @@ int main()
 			delay(100);
 		}
 */
+		printf("theta1 : %f, theta2 : %f\n",theta1, theta2);
+		printf("angle1 : %f, angle2 : %f\n",thetaL, thetaR);
+
+		tag = 1;
+
 		if (value > 5) {
 			value = 5;
 		}
@@ -181,7 +196,6 @@ int main()
 			value = -6;
 		}
 		softPwmWrite(SERVO, (standard+value));
-		softPwmWrite(PWM, 80);
 		digitalWrite(DIR, LOW);
 		digitalWrite(ENABLE, LOW);
 		delay(300);
