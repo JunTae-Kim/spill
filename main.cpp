@@ -35,7 +35,7 @@ int main()
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
 		return -1;
-	}	
+	}
 /*
 	CascadeClassifier cascade("haarcascade_frontalface_default.xml");
 
@@ -176,18 +176,15 @@ int main()
 			}
 			if (theta1 > 0.79 && theta1 < 0.83) {
 				softPwmWrite(SERVO, 15);
-				printf("15, theta1 : %f\n",theta1);
 			}
 			else if (theta1 <= 0.79) {
 				softPwmWrite(SERVO, 14);
-				printf("14, theta1 : %f\n",theta1);
 			}
 			else if (theta1 >= 0.83) {
 				softPwmWrite(SERVO, 16);
-				printf("16, theta1 : %f\n",theta1);
 			}
 
-			softPwmWrite(PWM, 50);
+			softPwmWrite(PWM, 100);
 			digitalWrite(DIR, LOW);
 			digitalWrite(ENABLE, LOW);
 			tag = 1;
@@ -199,20 +196,25 @@ int main()
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
 			if (tag2 != 2)
+          }
+                        else if (theta1 <= 0.79) {
+                                softPwmWrite(SERVO, 14);
+                        }
+                        else if (theta1 >= 0.83) {
+                                softPwmWrite(SERVO, 16);
+                        }
+
 			{
 				printf("right turn\ntheta1 : %f\n",theta1);
 			}
 			if (theta1 > 0.79 && theta1 < 0.83) {
 				softPwmWrite(SERVO, 16);
-				printf("right, theta1 : %f\n",theta1);
 			}
 			else if (theta1 <= 0.79) {
 				softPwmWrite(SERVO, 17);
-				printf("right, theta1 : %f\n",theta1);
 			}
 			else if (theta1 >= 0.83) {
 				softPwmWrite(SERVO, 15);
-				printf("right, theta1 : %f\n",theta1);
 			}
 //			else
 //				softPwmWrite(SERVO, 18);
