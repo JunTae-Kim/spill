@@ -47,7 +47,9 @@ int main()
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
 
-	softPwmCreate(SERVO, 0, RANGE);
+	softPwmCreate(SERVO, 0, 100);
+
+	pinMode(SERVO, PWM_OUTPUT);;
 
 	while (1)
 	{
@@ -152,58 +154,11 @@ int main()
 			{
 				printf("forward\n");
 			}
-//			softPwmWrite(SERVO, 15);
-//			delay(300);
+			softPwmWrite(SERVO, 15);
+			delay(500);
 			tag = 1;
 			tag2 = 1;
 
 		}
 
-		else if (pt1.x != 0 && pt3.x == 0)
-		{
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-
-			if (tag2 != 2)
-			{
-				printf("right turn\n");
-			}
-
-//			delay(300);
-			tag = 2;
-			tag2 = 2;
-		}
-
-		else if (pt1.x == 0 && pt3.x != 0)
-		{
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-
-			if (tag2 != 3)
-			{
-				printf("left turn\n");
-			}
-
-//			delay(300);
-			tag = 3;
-			tag2 = 3;
-		}
-
-//		t2 = getTickCount();						//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
-
-		imshow("Camera1", image);
-		imshow("Camera2", edgeimg);
-
-		int k = waitKey(1);
-		if (k == 27)
-			break;
-
-		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
-
-	} // While End 
-
-	cam.release();
-	destroyAllWindows();
-
-	return 0;
-
-}
+		else if (pt1.x != 0 &
