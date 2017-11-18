@@ -7,11 +7,11 @@ OPENCV = `pkg-config opencv --cflags --libs`
 LASPICAM = -lraspicam -lraspicam_cv
 LIBS = $(OPENCV) $(LASPICAM)
 WIRINGPI = '-lwiringPi'
-LOCATION = '/home/pi/wiringPi/wiringPi/softServo.c'
+LOCATION = '/home/pi/wiringPi/wiringPi/softServo.c -Ihome/pi/wiringPi/wiringPi -lwiringPi'
 .PHONY: all clean
 
 $(PROG):$(SRCS)
-	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS) $(LOCATION) $(WIRINGPI)
+	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS) $(LOCATION)
 
 all: $(PROG)
 
