@@ -3,7 +3,7 @@
 #include <softPwm.h>
 #include <softServo.h>
 
-#define RCSERVO 12
+#define RCSERVO 1
 
 int main(void)
 {

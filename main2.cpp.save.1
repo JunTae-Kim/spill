@@ -27,9 +27,10 @@ using namespace std;
 
 int main()
 {
-	int width = 320;
-	int height = 240;
+	int width = 640;
+	int height = 480;
 	int value = 0;
+	int b_value = 580;
 	float thetaR, thetaL;
 	Size framesize(width, height);
 
@@ -76,7 +77,7 @@ int main()
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
 
-		Rect rect(0, 100, 320, 120);
+		Rect rect(0, height / 3, width, height * 2 / 3);
 		Mat subimg = image(rect);
 
 		Canny(subimg, edgeimg, 320, 350);
@@ -146,19 +147,23 @@ int main()
 			line(subimg, pt1, pt2, Scalar(255, 0, 0), 4, CV_AA);
 			line(subimg, pt3, pt4, Scalar(0, 0, 255), 4, CV_AA);
 //			value = floor(abs((thetaR-standard_R)/4));
-			value = 0;
+//			value = 0;
 			softPwmWrite(PWM, 30);
-			if (thetaL <= 30)
+			value = floor(abs(300/15)*(45-thetaL));
+/*			if (thetaL <= 30)
 			{
 				value = floor(abs((thetaL-standard_L)/5));
 			}
-			printf("!!!!!both lines : %d\n", value);
+*/			printf("!!!!!both lines : %d\n", value);
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) { //left 
 			line(subimg, pt1, pt2, Scalar(255, 0, 0), 4, CV_AA);
 //			value = floor(abs((standard_L-thetaL)/5));
-			value = floor(abs((300/15)*(45-thetaL)));
+			if (value > 250)
+				value = 340;
+			else
+				value = floor(abs((300/15)*(45-thetaL)));
 			printf("left lines : %d\n", value);
 			softPwmWrite(PWM, 25);
 
@@ -167,7 +172,10 @@ int main()
 		else if (pt1.x == 0 && pt3.x != 0) { //right 
 			line(subimg, pt3, pt4, Scalar(0, 0, 255), 4, CV_AA);
 //			value = -floor(abs((thetaR-standard_R)/5));
-			value = -floor(abs((340/15)*(135-thetaR)));
+			if (value > -210)
+				value = -300;
+			else
+				value = -floor(abs((340/15)*(135-thetaR)));
 			printf("right lines : %d\n", value);
 			softPwmWrite(PWM, 25);
 		}
@@ -201,12 +209,15 @@ int main()
 			value = -300;
 		}
 
-		printf("value : %d\n",(standard+ value));
-		softServoWrite(SERVO, (standard+value));
-		digitalWrite(DIR, HIGH);
+		if (b_value != (standard + value)) {
+			printf("value : %d\n",(standard+ value));
+			softServoWrite(SERVO, (standard+value));
+			digitalWrite(DIR, HIGH);
+		}
 //		digitalWrite(ENABLE, LOW);
-		delay(300);
+		delay(500);
 		tag = 1;
+		b_value = standard + value;
 
 
 //		t2 = getTickCount();
