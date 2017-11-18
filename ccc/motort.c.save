@@ -3,7 +3,7 @@
 #include <softPwm.h>
 
 
-#define PWM 1 // pwm 1pin
+#define PWM 21 // pwm 1pin
 #define DIR 22 // 
 #define ENABLE 23 // 
 #define LEDT 6 // led
@@ -31,38 +31,25 @@ int main (void)
 //	pinMode(LEDT,OUTPUT);
 //	pinMode(SERVO,PWM_OUTPUT);
 
-	digitalWrite(PWM,LOW);
-//	digitalWrite(DIR,HIGH);
+//	digitalWrite(PWM,HIGH);
+//	digitalWrite(DIR,LOW)
 
 	softPwmCreate(PWM,0,200);
 //	softPwmCreate(SERVO,0,200);
 
-//	digitalWrite(DIR,LOW);
-
-//	softPwmWrite(PWM,200);
-//	delay(2000);
 
 //	softPwmWrite(SERVO,16);
-//	softPwmWrite(PWM,100);
-//	digitalWrite(PWM,HIGH);
+	softPwmWrite(PWM,50);
 	digitalWrite(DIR,HIGH);
 //	digitalWrite(ENABLE,LOW);
-//	delay(2000);
-
-	softPwmWrite(PWM, 50);
-	delay(2000);
-
-	softPwmWrite(PWM,0);
-
-//	digitalWrite(PWM,LOW);
-//	digitalWrite(DIR,LOW);
-//	delay(2000);
-
-//	softPwmWrite(PWM, 100);
+	delay(1000);
+//
+//	softPwmWrite(PWM, 200);
 //	digitalWrite(DIR,HIGH);
 //	digitalWrite(ENABLE,LOW);
-//	delay(2000);
+//	delay(5000);
 
+	//stop
 //	digitalWrite(PWM,LOW);
 //	softPwmWrite(SERVO, 0);
 //	softPwmWrite(PWM, 0);
