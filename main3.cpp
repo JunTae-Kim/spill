@@ -17,6 +17,7 @@ int main()
 {
 	int width = 320;
 	int height = 240;
+	int x1 = 0, y1 = 0, x2 = 0;
 
 	Size framesize(width, height);
 
@@ -62,14 +63,35 @@ int main()
 		Canny(image, edgeimg, 320, 350);
 
 		for (int y=0; y<height; y++){
-			for (x = 80 - (y - 60)/2; x <= 240 + (y - 60)/2; x++){
-				if () {
-
+			for (int x = 80 - (y - 60)/2; x <= 240 + (y - 60)/2; x++){
+				if (edgeimg.at<uchar>(y,x) == 255) {
+					x1 = x;
+					y1 = y;
+					break;
 				}
 			}
+			for (int x = 240 + (y - 60)/2; x >= 80 - (y - 60)/2; x--){
+				if (edgeimg.at<uchar>(y,x) == 255) {
+					x2 = x;
+					break;
+				}
+			}
+			if (x1 != 0 && x2 != 0){
+				for (; x1 <= x2; x1++){
+					image.at<uchar>(y1,x1) = 255;
+				}
+			}
+			
 		}
-	
-					image.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & edgeimg.at<uchar>(y,x);
+
+		for (int y=0; y<height; y++){
+			for (int x=0; x<width; x++){
+				image.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & edgeimg.at<uchar>(y,x);
+			}
+		}
+		x1 = 0;
+		x2 = 0;
+		y1 = 0;
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);

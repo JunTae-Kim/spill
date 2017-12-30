@@ -264,26 +264,4 @@ int main()
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
 
-		Rect rect(0, 100, 320, 120);
-		Mat subimg = image(rect);
-
-		imshow("CAM", subimg);
-		imshow("Camera1", image);
-		imshow("Camera2", edgeimg);
-
-		int k = waitKey(1);
-		if (k == 27)
-			break;
-		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
-
-	} // While End 
-
-	softPwmWrite(PWM, 0);
-//	digitalWrite(ENABLE, HIGH);
-	cam.release();
-	destroyAllWindows();
-
-	return 0;
-}
-*/
+		Rect r
