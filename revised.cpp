@@ -156,15 +156,14 @@ int main()
 	while (1) 
 	{
 		cam.grab();
-		cam.retrieve(Img);
-
-		originImg = Img;
+		cam.retrieve(originImg);
 
 		cvtColor(originImg, grayImg, CV_BGR2GRAY);
-		//GaussianBlur(grayImg, grayImg, Size(3, 3), 0, 0);
+		GaussianBlur(grayImg, grayImg, Size(3, 3), 0, 0);
 
-		imageROI = grayImg(cv::Rect(0, grayImg.rows / 2, grayImg.cols, grayImg.rows / 2));
-		Canny(imageROI, cannyImg, (grayImg.rows + grayImg.cols) / 4, (grayImg.rows + grayImg.cols) / 2);
+		Rect rect(0, 100, 320, 120);
+		imageROI = grayImg(rect);
+		Canny(imageROI, cannyImg, 320, 350);
 
 		getLeftLines(&originImg, &grayImg, &cannyImg, resultLine[LEFTLINE], CV_PI / 2);
 		getRightLines(&originImg, &grayImg, &cannyImg, resultLine[RIGHTLINE], CV_PI / 2);
@@ -202,12 +201,11 @@ int main()
 		banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
 		banishP.y = (int)(leftLineA * banishP.x + leftLineB);
 
-		cv::line(originImg, leftP[0], banishP, COLOR_BLUE, 2);
-		cv::line(originImg, rightP[1], banishP, COLOR_BLUE, 2);
+		line(originImg, leftP[0], banishP, COLOR_RED, 2);
+		line(originImg, rightP[1], banishP, COLOR_BLUE, 2);
 
 		imshow("Original", originImg);
 		imshow("Canny", cannyImg);
-		//imshow("vanish", vanishImg);
 
 		int k = waitKey(1);
 		if (k == 27)
@@ -220,70 +218,3 @@ int main()
 
 	return 0;
 }
-
-
-
-/*
-int main()
-{
-	int width = 320;
-	int height = 240;
-	int value = 0;
-	float thetaR, thetaL;
-	Size framesize(width, height);
-
-	raspicam::RaspiCam_Cv cam;
-
-	cam.set(CV_CAP_PROP_FORMAT, CV_8UC3);
-	cam.set(CV_CAP_PROP_FRAME_WIDTH, width);
-	cam.set(CV_CAP_PROP_FRAME_HEIGHT, height);
-
-	if (!cam.open()) {
-		cerr << "Camera open failed!" << endl;
-		return -1;
-	}	
-
-	if (wiringPiSetup() == -1) return 1; //wiringPi error
-
-	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range;
-	Mat red_hue_image, hsv, ROIframe, ROIimg;
-
-	bool do_flip = false;
-	int tag; 
-	int tag2 = 0;
-	int n = 3;
-	float theta1 = 0; float theta2 = 0;
-
-	vector<Vec2f> lines;
-	vector<Mat> ROI_planes;
-
-	while (1) {
-		cam.grab();
-		cam.retrieve(image);
-
-		cvtColor(image, image, CV_BGR2GRAY);
-		GaussianBlur(image, image, Size(3, 3), 0, 0);
-
-		Rect rect(0, 100, 320, 120);
-		Mat subimg = image(rect);
-
-		imshow("CAM", subimg);
-		imshow("Camera1", image);
-		imshow("Camera2", edgeimg);
-
-		int k = waitKey(1);
-		if (k == 27)
-			break;
-		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
-
-	} // While End 
-
-	softPwmWrite(PWM, 0);
-//	digitalWrite(ENABLE, HIGH);
-	cam.release();
-	destroyAllWindows();
-
-	return 0;
-}
-*/
