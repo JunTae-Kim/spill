@@ -30,6 +30,11 @@ int main()
 	int width = 320;
 	int height = 240;
 	int value = 0;
+	int b_value = 580;
+	int  k;
+	int num=5;
+	double thetaL_array[num-1];
+	double thetaR_array[num-1];
 	float thetaR, thetaL;
 	Size framesize(width, height);
 
@@ -50,7 +55,7 @@ int main()
 
 	Mat image, edgeimg, to_hsv1, lower_red_hue_range, upper_red_hud_range;
 	Mat red_hue_image, hsv, ROIframe, ROIimg;
-//	int64 t1, t2;
+	int64 t1, t2;
 	bool do_flip = false;
 	int tag; int tag2 = 0;
 	int n = 3;
@@ -76,67 +81,76 @@ int main()
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
 
-		Rect rect(0, 100, 320, 120);
+		Rect rect(0, height / 3, width, height * 2 / 3);
 		Mat subimg = image(rect);
 
 		Canny(subimg, edgeimg, 320, 350);
 
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 60, 0, 0);
 
-//		t1 = getTickCount();
+		t1 = getTickCount();
 
-		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
+		for (k = 0; k < num; k++)
 		{
-			float rho = lines[i][0], theta = lines[i][1];
-			float rho1, rho2;
-			int length = 800;
-			
-			if (tag != 0)
+			for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 			{
-				pt1.x=0;
-				pt1.y=0;
-				pt2.x=0;
-				pt2.y=0;
-				pt3.x=0;
-				pt3.y=0;
-				pt4.x=0;
-				pt4.y=0;
+				float rho = lines[i][0], theta = lines[i][1];
+				float rho1, rho2;
+				int length = 800;
+
+				if (tag != 0)
+				{
+					pt1.x=0;
+					pt1.y=0;
+					pt2.x=0;
+					pt2.y=0;
+					pt3.x=0;
+					pt3.y=0;
+					pt4.x=0;
+					pt4.y=0;
+				}
+
+				if (theta<1.5 && theta>=0)
+				{
+					theta1 = theta;
+					rho1 = rho;
+					double a1 = cos(theta1), b1 = sin(theta1);
+					double x0 = a1*rho1, y0 = b1*rho1;
+
+					pt1.x = cvRound(x0 - length * (-b1));
+					pt1.y = cvRound(y0 - length * (a1));
+					pt2.x = cvRound(x0 + length * (-b1));
+					pt2.y = cvRound(y0 + length * (a1));
+					tag = 0;
+				}
+
+				else if (theta<3.14 && theta>=2.0)
+				{
+					theta2 = theta;
+					rho2 = rho;
+					double a2 = cos(theta2), b2 = sin(theta2);
+					double x02 = a2*rho2, y02 = b2*rho2;
+
+					pt3.x = cvRound(x02 - length * (-b2));
+					pt3.y = cvRound(y02 - length * (a2));
+					pt4.x = cvRound(x02 + length * (-b2));
+					pt4.y = cvRound(y02 + length * (a2));
+					tag = 0;
+				}
+
 			}
 
-			if (theta<1.5 && theta>=0)
-			{
-				theta1 = theta;
-				rho1 = rho;
-				double a1 = cos(theta1), b1 = sin(theta1);
-				double x0 = a1*rho1, y0 = b1*rho1;
-
-				pt1.x = cvRound(x0 - length * (-b1));
-				pt1.y = cvRound(y0 - length * (a1));
-				pt2.x = cvRound(x0 + length * (-b1));
-				pt2.y = cvRound(y0 + length * (a1));
-				tag = 0;
-			}
-
-			else if (theta<3.14 && theta>=2.0)
-			{
-				theta2 = theta;
-				rho2 = rho;
-				double a2 = cos(theta2), b2 = sin(theta2);
-				double x02 = a2*rho2, y02 = b2*rho2;
-
-				pt3.x = cvRound(x02 - length * (-b2));
-				pt3.y = cvRound(y02 - length * (a2));
-				pt4.x = cvRound(x02 + length * (-b2));
-				pt4.y = cvRound(y02 + length * (a2));
-				tag = 0;
-			}
+			theta1 = 1.57 - theta1;
+			theta2 = 4.71 - theta2;
+			thetaL_array[k] = theta1 * 180/pi;
+			thetaR_array[k] = theta2 * 180/pi;
+			thetaL += thetaL_array[k];
+			thetaR += thetaR_array[k];
+			delay(10);
 		}
 
-		theta1 = 1.57 - theta1;
-		theta2 = 4.71 - theta2;
-		thetaL = theta1 * 180/pi;
-		thetaR = theta2 * 180/pi;
-
+		thetaL = thetaL / num;
+		thetaR = thetaR / num;
 
 		if (waitKey(30) == 27) {
 			cout << "esc key is pressed by user" << endl;
@@ -147,29 +161,36 @@ int main()
 			line(subimg, pt3, pt4, Scalar(0, 0, 255), 4, CV_AA);
 //			value = floor(abs((thetaR-standard_R)/4));
 			value = 0;
-			softPwmWrite(PWM, 30);
-			if (thetaL <= 30)
+			softPwmWrite(PWM, 35);
+//			value = floor(abs(300/15)*(45-thetaL));
+/*			if (thetaL <= 30)
 			{
 				value = floor(abs((thetaL-standard_L)/5));
 			}
-			printf("!!!!!both lines : %d\n", value);
+*/			printf("!!!!!both lines : %d\n", value);
 		}
 
 		else if (pt1.x != 0 && pt3.x == 0) { //left 
 			line(subimg, pt1, pt2, Scalar(255, 0, 0), 4, CV_AA);
 //			value = floor(abs((standard_L-thetaL)/5));
-			value = floor(abs((300/15)*(45-thetaL)));
+			if (value > 250)
+				value = 340;
+			else
+				value = floor(abs((300/15)*(45-thetaL)));
 			printf("left lines : %d\n", value);
-			softPwmWrite(PWM, 25);
+			softPwmWrite(PWM, 50);
 
 		}
 
 		else if (pt1.x == 0 && pt3.x != 0) { //right 
 			line(subimg, pt3, pt4, Scalar(0, 0, 255), 4, CV_AA);
 //			value = -floor(abs((thetaR-standard_R)/5));
-			value = -floor(abs((340/15)*(135-thetaR)));
+			if (value > -210)
+				value = -300;
+			else
+				value = -floor(abs((340/15)*(135-thetaR)));
 			printf("right lines : %d\n", value);
-			softPwmWrite(PWM, 25);
+			softPwmWrite(PWM, 50);
 		}
 
 /*
@@ -190,7 +211,7 @@ int main()
 		}
 */
 		printf("theta1 : %f, theta2 : %f\n",theta1, theta2);
-		printf("angle1 : %f, angle2 : %f\n",thetaL, thetaR);
+		printf("thetaL : %f, thetaR : %f\n",thetaL, thetaR);
 
 		tag = 1;
 
@@ -201,16 +222,20 @@ int main()
 			value = -300;
 		}
 
-		printf("value : %d\n",(standard+ value));
-		softServoWrite(SERVO, (standard+value));
+		if (b_value != (standard + value)) {
+			printf("value : %d\n",(standard+ value));
+			softServoWrite(SERVO, (standard+value));
+		}
 		digitalWrite(DIR, HIGH);
-//		digitalWrite(ENABLE, LOW);
-		delay(300);
+
+		thetaL = 0;
+		thetaR = 0;
 		tag = 1;
+		b_value = standard + value;
 
 
-//		t2 = getTickCount();
-//		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
+		t2 = getTickCount();
+		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 		imshow("CAM", subimg);
 		imshow("Camera1", image);
