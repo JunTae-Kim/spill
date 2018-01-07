@@ -149,7 +149,7 @@ int main()
 	Mat originImg;
 	Mat grayImg;
 	Mat cannyImg;
-	Mat imageROI, Img;
+	Mat imageROI;
 	float resultLine[2][2];
 	Point leftP[2], rightP[2], banishP;
 
@@ -185,24 +185,13 @@ int main()
 		}
 		*/
 
-		leftP[0].x = 0;
-		leftP[0].y = 0;
-		leftP[1].x = 0;
-		leftP[1].y = 0;
-		rightP[0].x = 0;
-		rightP[0].y = 0;
-		rightP[1].x = 0;
-		rightP[1].y = 0;
-		banishP.x = 0;
-		banishP.y = 0;
-
 		calLeftLanePoint(&originImg, resultLine[LEFTLINE], leftP);
 		calRightLanePoint(&originImg, resultLine[RIGHTLINE], rightP);
 
 		/* 소실점 검출 */
 		// 왼쪽 차선의 1차 방정식
 		float leftLineA = (float)(leftP[1].y - leftP[0].y) / (float)(leftP[1].x - leftP[0].x);	//기울기
-		float leftLineB = leftP[1].y - leftLineA * leftP[1].x;									//
+		float leftLineB = leftP[1].y - leftLineA * leftP[1].x;									//y절편
 
 		// 오른쪽 차선의 1차 방정식
 		float rightLineA = (float)(rightP[1].y - rightP[0].y) / (float)(rightP[1].x - rightP[0].x);
