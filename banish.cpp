@@ -38,9 +38,13 @@ int main()
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
 	int tag;
-	Point pt1, pt2, pt3, pt4;
 	float theta1, theta2;
+	Point pt1, pt2;		//left line  : up_point, down_point
+	Point pt4, pt3;		//right line : up_point, down_point
+	Point banishP;		//banish point
 
+
+	/* ROI image */
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
 			if (y >= 60 && y <= 180){
@@ -50,7 +54,9 @@ int main()
 			}
 		}
 	}
-		
+	/* ROI image end */
+
+
 	bool do_flip = false;
 
 	vector<Vec2f> lines;
@@ -99,6 +105,7 @@ int main()
 		x2 = 0;
 		y1 = 0;
 
+		/* Houghline detection */
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 30, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
@@ -149,41 +156,45 @@ int main()
 				tag = 0;
 			}
 		}
+		/* Houghline detection end */
 
-
+		/* Servo controll */
 		if (waitKey(30) == 27) {
 			cout << "esc key is pressed by user" << endl;
 		}
 
-		else if (pt1.x != 0 && pt3.x != 0) { //forward 
+		// forward 
+		else if (pt1.x != 0 && pt3.x != 0) { 
 
-			/* 소실점 검출 */
+			// banish Point detection 
 
-			// 왼쪽 차선의 1차 방정식
+			// leftLine : first linear equation
 			float leftLineA = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);	//기울기
 			float leftLineB = pt2.y - leftLineA * pt2.x;						//y절편
 
-			// 오른쪽 차선의 1차 방정식
+			// rightLine : first linear equation
 			float rightLineA = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);
-			float rightLineB = pt4.y - rightLineA * pt3.x;
+			float rightLineB = pt4.y - rightLineA * pt4.x;
 
-			// 1차 소실점: 좌우 1차선의 교점
+			// banishPoint : nodePoint of two equation
 			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
 			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
 
-			line(image, pt1, banishP, Scalar(255, 0, 0), 2, CV_AA);
-			line(image, pt4, banishP, Scalar(0, 0, 255), 2, CV_AA);
+			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
+			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 			tag = 1;
 			cout << "1" << endl;
 		}
 
-		else if (pt1.x != 0 && pt3.x == 0) { //left 
+		// left 
+		else if (pt1.x != 0 && pt3.x == 0) { 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 			tag = 2;
 			cout << "2" << endl;
 		}
 
-		else if (pt1.x == 0 && pt3.x != 0) { //right 
+		// right 
+		else if (pt1.x == 0 && pt3.x != 0) { 
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 			tag = 3;
 			cout << "3" << endl;
@@ -191,7 +202,7 @@ int main()
 
 		else {
 		}
-
+		/* Servo controll end */
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
