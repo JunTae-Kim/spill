@@ -19,6 +19,7 @@ int main()
 	int height = 240;
 	int x1 = 0, y1 = 0, x2 = 0;
 
+
 	Size framesize(width, height);
 
 	raspicam::RaspiCam_Cv cam;
