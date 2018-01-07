@@ -38,7 +38,7 @@ int main()
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
 	int tag;
-	Point pt1, pt2, pt3, pt4;
+	Point pt1, pt2, pt3, pt4, banishP;
 	float theta1, theta2;
 
 	for (int y=0; y<height; y++){
@@ -165,14 +165,14 @@ int main()
 
 			// 오른쪽 차선의 1차 방정식
 			float rightLineA = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);
-			float rightLineB = pt4.y - rightLineA * pt3.x;
+			float rightLineB = pt4.y - rightLineA * pt4.x;
 
 			// 1차 소실점: 좌우 1차선의 교점
 			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
 			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
 
-			line(image, pt1, banishP, Scalar(255, 0, 0), 2, CV_AA);
-			line(image, pt4, banishP, Scalar(0, 0, 255), 2, CV_AA);
+			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
+			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 			tag = 1;
 			cout << "1" << endl;
 		}
