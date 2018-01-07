@@ -10,6 +10,11 @@
 #include <softPwm.h>
 #include <softServo.h>
 
+#define SERVO 26
+#define PWM 1
+#define DIR 22
+#define standard 580
+
 using namespace cv;
 using namespace std;
 
@@ -18,7 +23,6 @@ int main()
 	int width = 320;
 	int height = 240;
 	int x1 = 0, y1 = 0, x2 = 0;
-
 
 	Size framesize(width, height);
 
@@ -34,6 +38,9 @@ int main()
 	}	
 
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
+
+	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
+	pinMode(SERVO, OUTPUT);
 
 	Mat image, edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
@@ -181,29 +188,42 @@ int main()
 			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
 			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
 
+			value = (160 - banishP.x)*0.5;
+
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 			tag = 1;
-			cout << "1" << endl;
+			cout << "forward" << endl;
 		}
 
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+			value = floor(abs((standard_L - thetaL) / 5));
+			if (value > 250)
+				value = 340;
+			else
+				value = floor(abs((300 / 15)*(45 - thetaL)));
 			tag = 2;
-			cout << "2" << endl;
+			cout << "left" << endl;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+			value = -floor(abs((thetaR - standard_R) / 5));
+			if (value > -210)
+				value = -300;
+			else
+				value = -floor(abs((340 / 15)*(135 - thetaR)));
 			tag = 3;
-			cout << "3" << endl;
+			cout << "right" << endl;
 		}
 
-		else {
+		if (b_value != (standard + value)) {
+			printf("value : %d\n", (standard + value));
+			softServoWrite(SERVO, (standard + value));
 		}
-		/* Servo controll end */
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
