@@ -14,6 +14,7 @@
 #define PWM 1
 #define DIR 22
 #define standard 580
+#define pi 3.141592
 
 using namespace cv;
 using namespace std;
@@ -22,6 +23,15 @@ int main()
 {
 	int width = 320;
 	int height = 240;
+	int value = 0;
+	int b_value = 580;
+	int tag;
+	int k;
+	float theta1, theta2;
+	float thetaL, thetaR;
+	Point pt1, pt2;		//left line  : up_point, down_point
+	Point pt4, pt3;		//right line : up_point, down_point
+	Point banishP;		//banish point
 	int x1 = 0, y1 = 0, x2 = 0;
 
 	Size framesize(width, height);
@@ -44,13 +54,6 @@ int main()
 
 	Mat image, edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
-
-	int tag;
-	float theta1, theta2;
-	Point pt1, pt2;		//left line  : up_point, down_point
-	Point pt4, pt3;		//right line : up_point, down_point
-	Point banishP;		//banish point
-
 
 	/* ROI image */
 	for (int y=0; y<height; y++){
@@ -164,6 +167,10 @@ int main()
 				tag = 0;
 			}
 		}
+		theta1 = 1.57 - theta1;
+		theta2 = 4.71 - theta2;
+		thetaL = theta1 * 180 / pi;
+		thetaR = theta2 * 180 / pi;
 		/* Houghline detection end */
 
 		/* Servo controll */
@@ -199,7 +206,6 @@ int main()
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-			value = floor(abs((standard_L - thetaL) / 5));
 			if (value > 250)
 				value = 340;
 			else
@@ -211,7 +217,6 @@ int main()
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-			value = -floor(abs((thetaR - standard_R) / 5));
 			if (value > -210)
 				value = -300;
 			else
