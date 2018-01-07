@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -g -Wall
-SRCS = main2.cpp
+SRCS = banish.cpp
 PROG = $(notdir $(CURDIR))
 
 OPENCV = `pkg-config opencv --cflags --libs`

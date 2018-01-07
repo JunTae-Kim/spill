@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <wiringPi.h>
 
-#define SERVO 12 // GPIO 1번 사용
+#define SERVO 26 // GPIO 1번 사용
 #define RANGE 200 // 신호 주기 20ms
 
 int main (void)
