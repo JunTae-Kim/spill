@@ -37,6 +37,10 @@ int main()
 	Mat image, edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
+	int tag;
+	Point pt1, pt2, pt3, pt4;
+	float theta1, theta2;
+
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
 			if (y >= 60 && y <= 180){
@@ -47,13 +51,17 @@ int main()
 		}
 	}
 		
-			
-
 	bool do_flip = false;
+
+	vector<Vec2f> lines;
+	vector<Mat> ROI_planes;
 
 	while (1) {
 		cam.grab();
 		cam.retrieve(image);
+
+		if (do_flip)
+			flip(image, image, -1);
 
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
@@ -90,6 +98,85 @@ int main()
 		x1 = 0;
 		x2 = 0;
 		y1 = 0;
+
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 30, 0, 0);
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			float rho = lines[i][0], theta = lines[i][1];
+			float rho1, rho2;
+			int length = 800;
+			
+			if (tag != 0)
+			{
+				pt1.x=0;
+				pt1.y=0;
+				pt2.x=0;
+				pt2.y=0;
+				pt3.x=0;
+				pt3.y=0;
+				pt4.x=0;
+				pt4.y=0;
+			}
+
+			if (theta<1.5 && theta>=0)
+			{
+				theta1 = theta;
+				rho1 = rho;
+				double a1 = cos(theta1), b1 = sin(theta1);
+				double x0 = a1*rho1, y0 = b1*rho1;
+
+				pt1.x = cvRound(x0 - length * (-b1));
+				pt1.y = cvRound(y0 - length * (a1));
+				pt2.x = cvRound(x0 + length * (-b1));
+				pt2.y = cvRound(y0 + length * (a1));
+
+				tag = 0;
+			}
+
+			else if (theta<3.14 && theta>=2.0)
+			{
+				theta2 = theta;
+				rho2 = rho;
+				double a2 = cos(theta2), b2 = sin(theta2);
+				double x02 = a2*rho2, y02 = b2*rho2;
+
+				pt3.x = cvRound(x02 - length * (-b2));
+				pt3.y = cvRound(y02 - length * (a2));
+				pt4.x = cvRound(x02 + length * (-b2));
+				pt4.y = cvRound(y02 + length * (a2));
+
+				tag = 0;
+			}
+		}
+
+
+		if (waitKey(30) == 27) {
+			cout << "esc key is pressed by user" << endl;
+		}
+
+		else if (pt1.x != 0 && pt3.x != 0) { //forward 
+			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+			cout << "1" << endl;
+			tag = 1;
+		}
+
+		else if (pt1.x != 0 && pt3.x == 0) { //left 
+			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+			tag = 2;
+			cout << "2" << endl;
+		}
+
+		else if (pt1.x == 0 && pt3.x != 0) { //right 
+			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+			tag = 3;
+			cout << "3" << endl;
+		}
+
+		else {
+		}
+
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);

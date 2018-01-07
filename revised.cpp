@@ -185,6 +185,17 @@ int main()
 		}
 		*/
 
+		leftP[0].x = 0;
+		leftP[0].y = 0;
+		leftP[1].x = 0;
+		leftP[1].y = 0;
+		rightP[0].x = 0;
+		rightP[0].y = 0;
+		rightP[1].x = 0;
+		rightP[1].y = 0;
+		banishP.x = 0;
+		banishP.y = 0;
+
 		calLeftLanePoint(&originImg, resultLine[LEFTLINE], leftP);
 		calRightLanePoint(&originImg, resultLine[RIGHTLINE], rightP);
 

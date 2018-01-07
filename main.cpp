@@ -54,7 +54,7 @@ int main()
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
 <<<<<<< HEAD
-	float angle, angle2;sdf
+	float angle, angle2;
 	softPwmCreate(SERVO, 0, RANGE);
 =======
 	float theta1, theta2;

@@ -23,7 +23,7 @@ int main (int argc, char *argv[])
 	start_time = micros();
 	while(digitalRead(echo) == 1);
 	end_time =  micros();
-	distance =10+ (end_time - start_time) / 29. / 2. ;
+	distance = (end_time - start_time) / 29. / 2. ;
 	printf("distance %.2f cm\n", distance);
 }
 return 0;
