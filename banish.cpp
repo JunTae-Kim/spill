@@ -13,8 +13,8 @@
 #define SERVO 26
 //#define PWM 1
 //#define DIR 22
-//#define RANGE 200
-#define standard 300
+#define RANGE 200
+#define standard 16
 #define pi 3.141592
 
 using namespace cv;
@@ -49,14 +49,13 @@ int main()
 
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
-	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
+//	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
 	pinMode(SERVO, OUTPUT);
 //	pinMode(PWM, PWM_OUTPUT);
 //	pinMode(DIR, OUTPUT);
 
+	softPwmCreate(SERVO, 0, RANGE);
 //	softPwmCreate(PWM, 0, RANGE);
-
-	softServoWrite(SERVO, standard);
 
 	Mat image, edgeimg, curve_edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
@@ -239,22 +238,22 @@ int main()
 			value = 0;
 		}
 		else if (value >= -150 && value < -50) {
-			value = -100;
+			value = -1;
 		}
 		else if (value >= -250 && value < -150) {
-			value = -200;
+			value = -2;
 		}
 		else if (value < -250) {
-			value = -250;
+			value = -3;
 		}
 		else if (value > 50 && value <= 150) {
-			value = 100;
+			value = 1;
 		}
 		else if (value > 150 && value <= 250) {
-			value = 200;
+			value = 2;
 		}
 		else if (value > 250) {
-			value = 250;
+			value = 3;
 		}
 		else {
 			value = 0;
@@ -262,7 +261,7 @@ int main()
 
 		if (b_value !=  value) {
 			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
-			softServoWrite(SERVO, (standard + value));
+			softPwmWrite(SERVO, (standard + value));
 		}
 
 		b_value = value;
