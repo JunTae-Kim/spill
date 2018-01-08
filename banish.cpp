@@ -11,10 +11,10 @@
 #include <softServo.h>
 
 #define SERVO 26
-#define PWM 1
-#define DIR 22
-#define RANGE 200
-#define standard 600
+//#define PWM 1
+//#define DIR 22
+//#define RANGE 200
+#define standard 300
 #define pi 3.141592
 
 using namespace cv;
@@ -51,10 +51,10 @@ int main()
 
 	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
 	pinMode(SERVO, OUTPUT);
-	pinMode(PWM, PWM_OUTPUT);
-	pinMode(DIR, OUTPUT);
+//	pinMode(PWM, PWM_OUTPUT);
+//	pinMode(DIR, OUTPUT);
 
-	softPwmCreate(PWM, 0, RANGE);
+//	softPwmCreate(PWM, 0, RANGE);
 
 	softServoWrite(SERVO, standard);
 
@@ -208,7 +208,7 @@ int main()
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
-			softPwmWrite(PWM, 30);
+//			softPwmWrite(PWM, 30);
 			printf("***********Both Line Detect***********\n");
 			tag = 1;
 		}
@@ -216,12 +216,10 @@ int main()
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-			if (value > 250)
-				value = 250;
-			else
-				value = floor(abs((300 / 15)*(48 - thetaL)));
 
-			softPwmWrite(PWM, 35);
+			value = floor(abs((300 / 30)*(48 - thetaL)));
+
+//			softPwmWrite(PWM, 35);
 			printf("***********Left Line Detect***********\n");
 			tag = 2;
 		}
@@ -229,14 +227,37 @@ int main()
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-			if (value < -210)
-				value = -210;
-			else
-				value = -floor(abs((340 / 15)*(131 - thetaR)));
 
-			softPwmWrite(PWM, 35);
+			value = -floor(abs((340 / 30)*(131 - thetaR)));
+
+//			softPwmWrite(PWM, 35);
 			printf("***********Right Line Detect***********\n");
 			tag = 3;
+		}
+
+		if (value >= -50 && value <= 50) {
+			value = 0;
+		}
+		else if (value >= -150 && value < -50) {
+			value = -100;
+		}
+		else if (value >= -250 && value < -150) {
+			value = -200;
+		}
+		else if (value < -250) {
+			value = -250;
+		}
+		else if (value > 50 && value <= 150) {
+			value = 100;
+		}
+		else if (value > 150 && value <= 250) {
+			value = 200;
+		}
+		else if (value > 250) {
+			value = 250;
+		}
+		else {
+			value = 0;
 		}
 
 		if (b_value !=  value) {
