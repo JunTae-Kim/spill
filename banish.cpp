@@ -209,7 +209,7 @@ int main()
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
 			softPwmWrite(PWM, 30);
-			printf("***********Both Line Detect***********");
+			printf("***********Both Line Detect***********\n");
 			tag = 1;
 		}
 
@@ -222,7 +222,7 @@ int main()
 				value = floor(abs((300 / 15)*(48 - thetaL)));
 
 			softPwmWrite(PWM, 35);
-			printf("***********Left Line Detect***********");
+			printf("***********Left Line Detect***********\n");
 			tag = 2;
 		}
 
@@ -235,7 +235,7 @@ int main()
 				value = -floor(abs((340 / 15)*(131 - thetaR)));
 
 			softPwmWrite(PWM, 35);
-			printf("***********Right Line Detect***********");
+			printf("***********Right Line Detect***********\n");
 			tag = 3;
 		}
 
