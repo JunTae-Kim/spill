@@ -1,0 +1,78 @@
+#include<stdio.h>
+#include<wiringPi.h>
+#include<softPwm.h>
+
+
+#define PWM 21
+#define DIR 22
+#define ENABLE 23
+#define SERVO 1
+#define trigPin 4
+#define echoPin 5
+
+	int main(void)
+{	int i;
+/*
+int distance=0;
+int pulse=0;
+*/
+	if(wiringPiSetup() == -1)
+	return 1;
+
+	pinMode(PWM,PWM_OUTPUT);
+	pinMode(DIR, OUTPUT);
+	pinMode(ENABLE, OUTPUT);
+	pinMode(SERVO,PWM_OUTPUT);
+
+	pinMode(trigPin, OUTPUT);
+	pinMode(echoPin, INPUT);
+
+/*
+for(;;)
+*/
+
+	while(1)
+{
+	digitalWrite(trigPin, LOW);
+	delay(200);
+	digitalWrite(trigPin, HIGH);
+	delayMicroseconds(10);
+	digitalWrite(trigPin, LOW);
+
+	while(digitalRead(echoPin) == LOW);
+
+	long startTime = micros();
+	while(digitalRead(echoPin) == HIGH);
+	long travelTime = micros() - startTime;
+
+	int distance = travelTime/58;
+
+	printf("distance;%dcm\n", distance);
+	delay(5);
+
+	softPwmCreate(PWM,0,100);
+	softPwmCreate(SERVO,0,200);
+
+	softPwmWrite(SERVO,100);
+	softPwmWrite(PWM, 50);
+	digitalWrite(DIR, LOW);
+	digitalWrite(ENABLE, LOW);
+
+/*
+	softPwmWrite(PWM, 50);
+	digitalWrite(DIR, HIGH);
+	digitalWrite(ENABLE, LOW);
+	delay(1000);
+*/
+
+	if(distance<=50)
+{
+	softPwmWrite(SERVO, 0);
+	digitalWrite(DIR, HIGH);
+	digitalWrite(ENABLE, HIGH);
+	
+}
+}
+}
+
+

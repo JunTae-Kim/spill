@@ -1,3 +1,5 @@
+/*
+
 #include <opencv2/opencv.hpp>
 #include <iostream>
 #include <raspicam/raspicam_cv.h>
@@ -33,7 +35,7 @@ int main()
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
 		return -1;
-	}	
+	}
 /*
 	CascadeClassifier cascade("haarcascade_frontalface_default.xml");
 
@@ -41,7 +43,7 @@ int main()
 		cerr << "Failed to open xml file!" << endl;
 		return -1;
 	}
-*/
+
 
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
@@ -51,12 +53,17 @@ int main()
 	int tag; int tag2 = 0;
 	int n = 3;
 	Point pt1, pt2, pt3, pt4;
+<<<<<<< HEAD
+	float angle, angle2;
+	softPwmCreate(SERVO, 0, RANGE);
+=======
 	float theta1, theta2;
 
 	pinMode(PWM,PWM_OUTPUT);
 	pinMode(SERVO,PWM_OUTPUT);
 	pinMode(DIR,OUTPUT);
 	pinMode(ENABLE,OUTPUT);
+>>>>>>> ede32cb933bea6220107c185384ba86986db9587
 
 
 	softPwmCreate(SERVO,0,RANGE1);
@@ -65,7 +72,8 @@ int main()
 	vector<Vec2f> lines;
 	vector<Mat> ROI_planes;
 
-	while (1) {
+	while (1)
+	{
 		cam.grab();
 		cam.retrieve(image);
 		image.copyTo(ROIframe);
@@ -88,8 +96,15 @@ int main()
 
 
 		HoughLines(edgeimg, lines, 1, CV_PI / 180, 100, 0, 0);
+<<<<<<< HEAD
+
+
+		t1 = getTickCount();
+
+=======
 
 //		t1 = getTickCount();
+>>>>>>> ede32cb933bea6220107c185384ba86986db9587
 
 		for (size_t i = 0; i < lines.size(); i++) // °ËÃâµÈ Æ÷ÀÎÆ®žŠ Â÷Œ±Àž·Î ¿¬°á. 
 		{
@@ -161,15 +176,12 @@ int main()
 			}
 			if (theta1 > 0.79 && theta1 < 0.83) {
 				softPwmWrite(SERVO, 15);
-				printf("15, theta1 : %f\n",theta1);
 			}
 			else if (theta1 <= 0.79) {
 				softPwmWrite(SERVO, 14);
-				printf("14, theta1 : %f\n",theta1);
 			}
 			else if (theta1 >= 0.83) {
 				softPwmWrite(SERVO, 16);
-				printf("16, theta1 : %f\n",theta1);
 			}
 
 			softPwmWrite(PWM, 100);
@@ -184,6 +196,14 @@ int main()
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
 			if (tag2 != 2)
+          }
+                        else if (theta1 <= 0.79) {
+                                softPwmWrite(SERVO, 14);
+                        }
+                        else if (theta1 >= 0.83) {
+                                softPwmWrite(SERVO, 16);
+                        }
+
 			{
 				printf("right turn\ntheta1 : %f\n",theta1);
 			}
@@ -256,11 +276,10 @@ int main()
 
 
 
+<<<<<<< HEAD
+=======
 /*
 		unsigned char* data = (unsigned char*)img.data;
-
-//		t1 = getTickCount();
-
 
 		for (i = 0;i < height;i++)
 		{
@@ -352,7 +371,7 @@ int main()
 		else
 		{
 			printf("error\n");
-		}
+		}sdf
 
 		t2 = getTickCount();
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
@@ -367,12 +386,13 @@ int main()
 		else if (k == 'f' || k == 'F')
 			do_flip = !do_flip;
 	}
+>>>>>>> ede32cb933bea6220107c185384ba86986db9587
 
 
-*/
 	digitalWrite(ENABLE, HIGH);
 	cam.release();
 	destroyAllWindows();
 
 	return 0;
 }
+*/
