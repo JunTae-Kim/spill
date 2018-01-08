@@ -14,7 +14,7 @@
 //#define PWM 1
 //#define DIR 22
 #define RANGE 200
-#define standard 16
+#define standard 21
 #define pi 3.141592
 
 using namespace cv;
@@ -159,7 +159,7 @@ int main()
 				tag = 0;
 			}
 
-			else if (theta<3.14 && theta>=2.0)
+			else if (theta<3.14 && theta>=1.57)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -255,16 +255,22 @@ int main()
 		else if (value > 250) {
 			value = 3;
 		}
-		else {
-			value = 0;
-		}
+	//	else {
+	//		value = 0;
+	//	}
 
-		if (b_value !=  value) {
-			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
-			softPwmWrite(SERVO, (standard + value));
-		}
+		int input = standard + value;
 
-		b_value = value;
+	//	if (b_value !=  value) {
+			printf("input : %d, thetaL : %0.2f, thetaR : %0.2f\n", input, thetaL, thetaR);
+			softPwmWrite(SERVO, input);
+			delay(500);
+	//	}
+
+	//	b_value = value;
+		thetaL=0;
+		thetaR=0;
+		tag=1;
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
