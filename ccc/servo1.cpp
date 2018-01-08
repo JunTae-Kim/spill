@@ -3,7 +3,7 @@
 #include <softPwm.h>
 #include <softServo.h>
 
-#define RCSERVO 1
+#define RCSERVO 12
 
 int main(void)
 {
@@ -14,6 +14,7 @@ int main(void)
 		return 1;
 
 	softServoSetup(RCSERVO, -1, -1, -1, -1, -1, -1, -1);
+	pinMode(RCSERVO, OUTPUT);
 
 //	pinMode(PWM, PWM_OUTPUT);
 //	pinMode(DIR, OUTPUT);

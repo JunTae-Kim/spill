@@ -13,9 +13,7 @@
 #define SERVO 26
 #define PWM 1
 #define DIR 22
-#define RANGE 200
-#define standard 600
-#define pi 3.141592
+#define standard 580
 
 using namespace cv;
 using namespace std;
@@ -24,14 +22,6 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-	int value = 0;
-	int b_value = 0;
-	int tag;
-	float theta1 = 0, theta2 = 0;
-	float thetaL, thetaR;
-	Point pt1, pt2;		//left line  : up_point, down_point
-	Point pt4, pt3;		//right line : up_point, down_point
-	Point banishP;		//banish point
 	int x1 = 0, y1 = 0, x2 = 0;
 
 	Size framesize(width, height);
@@ -51,15 +41,16 @@ int main()
 
 	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
 	pinMode(SERVO, OUTPUT);
-	pinMode(PWM, PWM_OUTPUT);
-	pinMode(DIR, OUTPUT);
 
-	softPwmCreate(PWM, 0, RANGE);
-
-	softServoWrite(SERVO, standard);
-
-	Mat image, edgeimg, curve_edgeimg;
+	Mat image, edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
+
+	int tag;
+	float theta1, theta2;
+	Point pt1, pt2;		//left line  : up_point, down_point
+	Point pt4, pt3;		//right line : up_point, down_point
+	Point banishP;		//banish point
+
 
 	/* ROI image */
 	for (int y=0; y<height; y++){
@@ -77,6 +68,7 @@ int main()
 	bool do_flip = false;
 
 	vector<Vec2f> lines;
+	vector<Mat> ROI_planes;
 
 	while (1) {
 		cam.grab();
@@ -90,21 +82,18 @@ int main()
 		Canny(image, edgeimg, 320, 350);
 
 		for (int y=60; y<180; y++){
-			for (int x = 80 - (y - 60); x < 160; x++){
+			for (int x = 80 - (y - 60); x <= 240 + (y - 60); x++){
 				if (edgeimg.at<uchar>(y,x) == 255) {
 					x1 = x;
 					y1 = y;
 					break;
 				}
-				x1 = x;
-				y1 = y;
 			}
-			for (int x = 240 + (y - 60); x > 160; x--){
+			for (int x = 240 + (y - 60); x >= 80 - (y - 60); x--){
 				if (edgeimg.at<uchar>(y,x) == 255) {
 					x2 = x;
 					break;
 				}
-				x2 = x;
 			}
 			if ((x1 != 240 + (y - 60) + 1) && (x2 != 80 - (y - 60) - 1)){
 				for (x1+=1; x1 < x2; x1++){
@@ -175,10 +164,6 @@ int main()
 				tag = 0;
 			}
 		}
-		theta1 = 1.57 - theta1;
-		theta2 = 4.71 - theta2;
-		thetaL = theta1 * 180 / pi;
-		thetaR = theta2 * 180 / pi;
 		/* Houghline detection end */
 
 		/* Servo controll */
@@ -203,52 +188,46 @@ int main()
 			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
 			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
 
-			value = (160 - banishP.x)*2;
+			value = (160 - banishP.x)*0.5;
 
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
-
-			softPwmWrite(PWM, 30);
-			printf("***********Both Line Detect***********");
 			tag = 1;
+			cout << "forward" << endl;
 		}
 
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+			value = floor(abs((standard_L - thetaL) / 5));
 			if (value > 250)
-				value = 250;
+				value = 340;
 			else
-				value = floor(abs((300 / 15)*(48 - thetaL)));
-
-			softPwmWrite(PWM, 35);
-			printf("***********Left Line Detect***********");
+				value = floor(abs((300 / 15)*(45 - thetaL)));
 			tag = 2;
+			cout << "left" << endl;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
-			if (value < -210)
-				value = -210;
+			lin(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+			value = -floor(abs((thetaR - standard_R) / 5));
+			if (value > -210)
+				value = -300;
 			else
-				value = -floor(abs((340 / 15)*(131 - thetaR)));
-
-			softPwmWrite(PWM, 35);
-			printf("***********Right Line Detect***********");
+				value = -floor(abs((340 / 15)*(135 - thetaR)));
 			tag = 3;
+			cout << "right" << endl;
 		}
 
-		if (b_value !=  value) {
-			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
+		if (b_value != (standard + value)) {
+			printf("value : %d\n", (standard + value));
 			softServoWrite(SERVO, (standard + value));
 		}
 
-		b_value = value;
-
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
-		imshow("Camera4", ROIimg);
+		imshow("Camera3", ROIimg);
 
 		int k = waitKey(1);
 		if (k == 27)
