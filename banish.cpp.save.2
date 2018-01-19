@@ -11,8 +11,8 @@
 #include <softServo.h>
 
 #define SERVO 26
-#define PWM 1
-#define DIR 22
+//#define PWM 1
+//#define DIR 22
 #define RANGE 200
 #define standard 8
 #define pi 3.141592
@@ -52,11 +52,11 @@ int main()
 
 //	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
 	pinMode(SERVO, OUTPUT);
-	pinMode(PWM, PWM_OUTPUT);
-	pinMode(DIR, OUTPUT);
+//	pinMode(PWM, PWM_OUTPUT);
+//	pinMode(DIR, OUTPUT);
 
 	softPwmCreate(SERVO, 0, RANGE);
-	softPwmCreate(PWM, 0, RANGE);
+//	softPwmCreate(PWM, 0, RANGE);
 
 	Mat image, edgeimg, curve_edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
@@ -87,7 +87,7 @@ int main()
 
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 330, 360);
+		Canny(image, edgeimg, 320, 350);
 
 //		t1 = getTickCount();
 
@@ -210,7 +210,7 @@ int main()
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
-			softPwmWrite(PWM, 15);
+//			softPwmWrite(PWM, 30);
 			printf("***********Both Line Detect***********\n");
 			tag = 1;
 		}
@@ -221,7 +221,7 @@ int main()
 
 			value = floor(abs((300 / 15)*(48 - thetaL)));
 
-			softPwmWrite(PWM, 10);
+//			softPwmWrite(PWM, 35);
 			printf("***********Left Line Detect***********\n");
 			tag = 2;
 		}
@@ -232,7 +232,7 @@ int main()
 
 			value = -floor(abs((340 / 15)*(131 - thetaR)));
 
-			softPwmWrite(PWM, 10);
+//			softPwmWrite(PWM, 35);
 			printf("***********Right Line Detect***********\n");
 			tag = 3;
 		}
@@ -280,15 +280,15 @@ int main()
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 
-//		imshow("Camera1", image);
+		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
-//		imshow("Camera4", ROIimg);
+		imshow("Camera4", ROIimg);
 
 		int k = waitKey(1);
 		if (k == 27)
 			break;
 		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
+				do_flip = !do_flip;
 
 	}
 

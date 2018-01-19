@@ -22,8 +22,8 @@ using namespace std;
 
 int main()
 {
-	int width = 320;
-	int height = 240;
+	int width = 160;
+	int height = 120;
 	int value ;
 	int b_value ;
 	int tag;
@@ -64,8 +64,8 @@ int main()
 	/* ROI image */
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
-			if (y >= 60 && y <= 180){
-				if (x >= (80 - (y - 60)) && x <= (240 + (y - 60))){
+			if (y >= 30 && y <= 90){
+				if (x >= (40 - (y - 30)) && x <= (120 + (y - 30))){
 					ROIimg.at<uchar>(y,x) = 255;
 				}
 			}
@@ -87,12 +87,12 @@ int main()
 
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 330, 360);
+		Canny(image, edgeimg, 320, 350);
 
 //		t1 = getTickCount();
 
-		for (int y=60; y<180; y++){
-			for (int x = 80 - (y - 60); x < 160; x++){
+		for (int y=30; y<90; y++){
+			for (int x = 40 - (y - 30); x < 40; x++){
 				if (edgeimg.at<uchar>(y,x) == 255) {
 					x1 = x;
 					y1 = y;
@@ -101,26 +101,26 @@ int main()
 				x1 = x;
 				y1 = y;
 			}
-			for (int x = 240 + (y - 60); x > 160; x--){
+			for (int x = 120 + (y - 30); x > 80; x--){
 				if (edgeimg.at<uchar>(y,x) == 255) {
 					x2 = x;
 					break;
 				}
 				x2 = x;
 			}
-			if ((x1 != 240 + (y - 60) + 1) && (x2 != 80 - (y - 60) - 1)){
+			if ((x1 != 120 + (y - 30) + 1) && (x2 != 40 - (y - 30) - 1)){
 				for (x1+=1; x1 < x2; x1++){
 					edgeimg.at<uchar>(y1,x1) = 0;
 				}
 			}
-			
+	
 		}
 
-		for (int y=0; y<height; y++){
-			for (int x=0; x<width; x++){
-				edgeimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & edgeimg.at<uchar>(y,x);
-			}
-		}
+//		for (int y=0; y<height; y++){
+//			for (int x=0; x<width; x++){
+//				edgeimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & edgeimg.at<uchar>(y,x);
+//			}
+//		}
 
 		x1 = 0;
 		x2 = 0;
@@ -280,7 +280,7 @@ int main()
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 
-//		imshow("Camera1", image);
+		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
 //		imshow("Camera4", ROIimg);
 
