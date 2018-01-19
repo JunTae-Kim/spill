@@ -22,8 +22,8 @@ using namespace std;
 
 int main()
 {
-	int width = 320;
-	int height = 240;
+	int width = 160;
+	int height = 120;
 	int ROI_widthL = floor(width/4);
 	int ROI_widthR = floor(width*3/4);
 	int ROI_heightH = floor(height/4);
@@ -129,7 +129,7 @@ int main()
 		y1 = 0;
 
 		/* Houghline detection */
-		HoughLines(edgeimg, lines, 1, CV_PI / 180, 30, 0, 0);
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 20, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
