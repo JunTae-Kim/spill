@@ -10,11 +10,7 @@
 #include <softPwm.h>
 #include <softServo.h>
 
-#define SERVO 26
-//#define PWM 1
-//#define DIR 22
-#define RANGE 200
-#define standard 16
+#define standard 8
 #define pi 3.141592
 
 using namespace cv;
@@ -22,8 +18,8 @@ using namespace std;
 
 int main()
 {
-	int width = 160;
-	int height = 120;
+	int width = 320;
+	int height = 240;
 	int ROI_widthL = floor(width / 4);
 	int ROI_widthR = floor(width * 3 / 4);
 	int ROI_heightH = floor(height / 4);
@@ -53,14 +49,6 @@ int main()
 	}
 
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
-
-										 //	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
-	pinMode(SERVO, OUTPUT);
-	//	pinMode(PWM, PWM_OUTPUT);
-	//	pinMode(DIR, OUTPUT);
-
-	softPwmCreate(SERVO, 0, RANGE);
-	//	softPwmCreate(PWM, 0, RANGE);
 
 	Mat image, edgeimg, curve_edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
@@ -212,7 +200,6 @@ int main()
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
-			softPwmWrite(PWM, 15);
 			printf("***********Both Line Detect***********\n");
 			tag = 1;
 		}
@@ -234,7 +221,6 @@ int main()
 
 			value = -floor(abs((340 / 15)*(131 - thetaR)));
 
-			softPwmWrite(PWM, 10);
 			printf("***********Right Line Detect***********\n");
 			tag = 3;
 		}
@@ -260,20 +246,15 @@ int main()
 		else if (value > 250) {
 			value = 3;
 		}
-	//	else {
-	//		value = 0;
-	//	}
 
 		int input = standard + value;
 
 		if (b_value !=  value) {
 			printf("input : %d, thetaL : %0.2f, thetaR : %0.2f\n", input, thetaL, thetaR);
-			softPwmWrite(SERVO, input);
-			delay(100);
-			softPwmWrite(SERVO, 0);
 		}
 
 		b_value = value;
+
 		thetaL=0;
 		thetaR=0;
 		tag=1;

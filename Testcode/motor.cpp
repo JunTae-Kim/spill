@@ -10,10 +10,10 @@
 #include <softPwm.h>
 #include <softServo.h>
 
-
 #define PWM 1
 #define DIR 22
-#define ENABLE 23
+//#define ENABLE 23
+#define RANGE 100
 #define pi 3.141592
 
 using namespace cv;
@@ -21,24 +21,18 @@ using namespace std;
 
 int main()
 {
-
-	int value = 0;
-
-	if (wiringPiSetup() == -1) return 1; //wiringPi error
-
-	int64 t1, t2;
-	bool do_flip = false;
-	int tag; int tag2 = 0;
-	int n = 3;
-	Point pt1, pt2, pt3, pt4;
-	float theta1 = 0; float theta2 = 0;
+	int stri;
+	if (wiringPiSetup() == -1) 
+	{
+		return 1; //wiringPi error
+	}
 
 	pinMode(PWM,PWM_OUTPUT);
 	pinMode(DIR,OUTPUT);
-	pinMode(ENABLE,OUTPUT);
+//	pinMode(ENABLE,OUTPUT);
 
-	softPwmCreate(PWM,0,RANGE2);
-
+	softPwmCreate(PWM,0,RANGE);
+	digitalWrite(DIR, HIGH);
 
 	while (1) 
 	{
@@ -48,11 +42,17 @@ int main()
 			cout << "esc key is pressed by user" << endl;
 		}
 
-		softPwmWrite(PWM, 35);
-		delay(2000);
-		softPwmWrite(PWM, 0);
+		fputs("input int  : ", stdout);
+		scanf("%d", &stri);
 
-		digitalWrite(DIR, HIGH);
+		if (stri != 0) {
+		softPwmWrite(PWM, stri);
+		delay (2000);
+		softPwmWrite(PWM, 0);
+		}
+
+		else if (stri == 0) return 0;
+
 
 		int k = waitKey(1);
 		if (k == 27)
@@ -61,8 +61,6 @@ int main()
 			do_flip = !do_flip;
 
 	} // While End 
-
-	digitalWrite(ENABLE, HIGH);
 
 	return 0;
 }

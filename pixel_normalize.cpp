@@ -14,7 +14,7 @@
 //#define PWM 1
 //#define DIR 22
 #define RANGE 200
-#define standard 16
+#define standard 8
 #define pi 3.141592
 
 using namespace cv;
@@ -22,8 +22,8 @@ using namespace std;
 
 int main()
 {
-	int width = 160;
-	int height = 120;
+	int width = 320;
+	int height = 240;
 	int ROI_widthL = floor(width/4);
 	int ROI_widthR = floor(width*3/4);
 	int ROI_heightH = floor(height/4);
@@ -32,6 +32,7 @@ int main()
 	int value = 0;
 	int b_value = 0;
 	int tag;
+	int64 t1, t2;
 	float theta1 = 0, theta2 = 0;
 	float thetaL, thetaR;
 	Point pt1, pt2;		//left line  : up_point, down_point
@@ -83,6 +84,8 @@ int main()
 	vector<Vec2f> lines;
 
 	while (1) {
+		t1 = getTickCount();
+
 		cam.grab();
 		cam.retrieve(image);
 
@@ -264,9 +267,12 @@ int main()
 			value = 0;
 		}
 
+		softPwmWrite(SERVO, 0);
+
 		if (b_value !=  value) {
 			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
 			softPwmWrite(SERVO, (standard + value));
+			delay(100);
 		}
 
 		b_value = value;
@@ -274,6 +280,9 @@ int main()
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
 		imshow("Camera4", ROIimg);
+
+		t2 = getTickCount();
+		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 		int k = waitKey(1);
 		if (k == 27)
