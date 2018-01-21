@@ -201,7 +201,7 @@ int main()
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
 			printf("***********Both Line Detect***********\n");
-			printf("banishP.x : %d, banishP.y : %d", banishP.x, banishP.y);
+			printf("banishP.x : %d, banishP.y : %d\n", banishP.x, banishP.y);
 			tag = 1;
 		}
 
@@ -213,7 +213,7 @@ int main()
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
 			printf("***********Left Line Detect***********\n");
-			printf("leftP.x : %d, leftP.y : %d", pt1.x, pt1.y);
+			printf("leftP.x : %d, leftP.y : %d\n", pt1.x, pt1.y);
 			tag = 2;
 		}
 
@@ -225,7 +225,7 @@ int main()
 			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
 			printf("***********Right Line Detect***********\n");
-			printf("rightP.x : %d, rightP.y : %d", pt4.x, pt4.y);
+			printf("rightP.x : %d, rightP.y : %d\n", pt4.x, pt4.y);
 			tag = 3;
 		}
 
