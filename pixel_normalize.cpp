@@ -11,8 +11,8 @@
 #include <softServo.h>
 
 #define SERVO 26
-//#define PWM 1
-//#define DIR 22
+#define PWM 1
+#define DIR 22
 #define RANGE 200
 #define standard 8
 #define pi 3.141592
@@ -37,6 +37,8 @@ int main()
 	float thetaL, thetaR;
 	Point pt1, pt2;		//left line  : up_point, down_point
 	Point pt4, pt3;		//right line : up_point, down_point
+	Point leftP;		//left point
+	Point rightP;		//right point
 	Point banishP;		//banish point
 	int x1 = 0, y1 = 0, x2 = 0;
 
@@ -57,11 +59,11 @@ int main()
 
 //	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
 	pinMode(SERVO, OUTPUT);
-//	pinMode(PWM, PWM_OUTPUT);
-//	pinMode(DIR, OUTPUT);
+	pinMode(PWM, PWM_OUTPUT);
+	pinMode(DIR, OUTPUT);
 
 	softPwmCreate(SERVO, 0, RANGE);
-//	softPwmCreate(PWM, 0, RANGE);
+	softPwmCreate(PWM, 0, RANGE);
 
 	Mat image, edgeimg, curve_edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
@@ -77,7 +79,6 @@ int main()
 		}
 	}
 	/* ROI image end */
-
 
 	bool do_flip = false;
 
@@ -194,54 +195,78 @@ int main()
 		}
 
 		// forward 
-		else if (pt1.x != 0 && pt3.x != 0) { 
+		else if (pt1.x != 0 && pt3.x != 0) {
 
 			// banish Point detection 
 
 			// leftLine : first linear equation
-			float leftLineA = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);	//기울기
-			float leftLineB = pt2.y - leftLineA * pt2.x;						//y절편
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
 
 			// rightLine : first linear equation
-			float rightLineA = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);
-			float rightLineB = pt4.y - rightLineA * pt4.x;
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
 
 			// banishPoint : nodePoint of two equation
-			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
-			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
-
-			value = (160 - banishP.x)*2;
-
+			banishP.x = (int)((interceptR - interceptL) / (gradientL - gradientR));
+			banishP.y = (int)(gradientL * banishP.x + interceptL);
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
-//			softPwmWrite(PWM, 30);
+			value = (160 - banishP.x) * 2;
+			softPwmWrite(PWM, 50);
+
 			printf("***********Both Line Detect***********\n");
+			printf("banishP.x : %d, value : %d\n", banishP.x, value);
 			tag = 1;
 		}
 
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-			value = floor(abs((300 / 30)*(48 - thetaL)));
+			// left Point detection 
 
-//			softPwmWrite(PWM, 35);
+			// leftLine : first linear equation
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
+
+			// leftPoint : nodePoint of two equation
+			leftP.x = (int)(interceptL / gradientL);
+			leftP.y = (int)(gradientL * leftP.x + interceptL);
+			line(image, pt2, leftP, Scalar(255, 0, 0), 2, CV_AA);
+
+			value = (160 - leftP.x) * 2;
+			softPwmWrite(PWM, 35);
+
 			printf("***********Left Line Detect***********\n");
+			printf("leftP.x : %d, value : %d\n", leftP.x, value);
 			tag = 2;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			value = -floor(abs((340 / 30)*(131 - thetaR)));
+			// right Point detection 
 
-//			softPwmWrite(PWM, 35);
+			// rightLine : first linear equation
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
+
+			// rightPoint : nodePoint of two equation
+			rightP.x = (int)(interceptR / gradientR);
+			rightP.y = (int)(gradientR * rightP.x + interceptR);
+
+			value = -(160 - rightP.x) * 2;
+
+			line(image, pt3, rightP, Scalar(255, 0, 0), 2, CV_AA);
+			softPwmWrite(PWM, 35);
+
 			printf("***********Right Line Detect***********\n");
+			printf("rightP.x : %d, value : %d\n", rightP.x, value);
 			tag = 3;
 		}
 
+		// value normalization
 		if (value >= -50 && value <= 50) {
 			value = 0;
 		}
@@ -276,10 +301,11 @@ int main()
 		}
 
 		b_value = value;
+		/* Servo controll end */
 
 		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
-		imshow("Camera4", ROIimg);
+//		imshow("Camera4", ROIimg);
 
 		t2 = getTickCount();
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
