@@ -210,12 +210,11 @@ int main()
 
 			value = floor(abs((300 / 15)*(48 - thetaL)));
 
-<<<<<<< HEAD
+
 			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-=======
 		//	softPwmWrite(PWM, 10);
->>>>>>> 5803daecde4f6526421a86695f3ef44a4101e282
+
 			printf("***********Left Line Detect***********\n");
 			printf("leftP.x : %d, leftP.y : %d\n", pt1.x, pt1.y);
 			tag = 2;
