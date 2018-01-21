@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <wiringPi.h>
 #include <softPwm.h>
-#include <softServo.h>
 
 #define PWM 1
 #define DIR 22
@@ -26,6 +25,8 @@ int main()
 	{
 		return 1; //wiringPi error
 	}
+
+	bool do_flip = false;
 
 	pinMode(PWM,PWM_OUTPUT);
 	pinMode(DIR,OUTPUT);
@@ -47,7 +48,7 @@ int main()
 
 		if (stri != 0) {
 		softPwmWrite(PWM, stri);
-		delay (2000);
+		delay (1000);
 		softPwmWrite(PWM, 0);
 		}
 
@@ -57,6 +58,8 @@ int main()
 		int k = waitKey(1);
 		if (k == 27)
 			break;
+		else if (k == 'f' || k == 'F')
+			do_flip = !do_flip;
 
 	} // While End 
 
