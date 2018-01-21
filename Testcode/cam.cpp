@@ -179,49 +179,57 @@ int main()
 		}
 
 		// forward 
-		else if (pt1.x != 0 && pt3.x != 0) { 
+		else if (pt1.x != 0 && pt3.x != 0) {
 
 			// banish Point detection 
 
 			// leftLine : first linear equation
-			float leftLineA = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);	//기울기
-			float leftLineB = pt2.y - leftLineA * pt2.x;						//y절편
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
 
 			// rightLine : first linear equation
-			float rightLineA = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);
-			float rightLineB = pt4.y - rightLineA * pt4.x;
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
 
 			// banishPoint : nodePoint of two equation
-			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
-			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
+			banishP.x = (int)((interceptR - interceptL) / (gradientL - gradientR));
+			banishP.y = (int)(gradientL * banishP.x + interceptL);
 
-			value = (160 - banishP.x)*2;
+			value = (160 - banishP.x) * 2;
 
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
 			printf("***********Both Line Detect***********\n");
+			printf("banishP.x : %d, banishP.y : %d\n", banishP.x, banishP.y);
 			tag = 1;
 		}
 
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
 			value = floor(abs((300 / 15)*(48 - thetaL)));
 
+<<<<<<< HEAD
+			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
+
+=======
 		//	softPwmWrite(PWM, 10);
+>>>>>>> 5803daecde4f6526421a86695f3ef44a4101e282
 			printf("***********Left Line Detect***********\n");
+			printf("leftP.x : %d, leftP.y : %d\n", pt1.x, pt1.y);
 			tag = 2;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
 			value = -floor(abs((340 / 15)*(131 - thetaR)));
 
+			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+
 			printf("***********Right Line Detect***********\n");
+			printf("rightP.x : %d, rightP.y : %d\n", pt4.x, pt4.y);
 			tag = 3;
 		}
 
