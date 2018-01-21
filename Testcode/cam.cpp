@@ -210,7 +210,7 @@ int main()
 
 			value = floor(abs((300 / 15)*(48 - thetaL)));
 
-			softPwmWrite(PWM, 10);
+		//	softPwmWrite(PWM, 10);
 			printf("***********Left Line Detect***********\n");
 			tag = 2;
 		}
