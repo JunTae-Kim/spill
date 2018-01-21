@@ -1,6 +1,6 @@
 CC = g++
 CFLAGS = -g -Wall
-SRCS = servo.cpp
+SRCS = cam.cpp
 PROG = $(notdir $(CURDIR))
 
 OPENCV = `pkg-config opencv --cflags --libs`
