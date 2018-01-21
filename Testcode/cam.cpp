@@ -33,6 +33,8 @@ int main()
 	Point pt1, pt2;		//left line  : up_point, down_point
 	Point pt4, pt3;		//right line : up_point, down_point
 	Point banishP;		//banish point
+	Point leftP;		//left point
+	Point rightP;		//right point
 	int x1 = 0, y1 = 0, x2 = 0;
 
 	Size framesize(width, height);
@@ -185,11 +187,11 @@ int main()
 
 			// leftLine : first linear equation
 			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
-			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
+			float interceptL = pt2.y - gradientL * pt2.x;					// y-intercept
 
 			// rightLine : first linear equation
 			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
-			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
+			float interceptR = pt4.y - gradientR * pt4.x;					// y-intercept
 
 			// banishPoint : nodePoint of two equation
 			banishP.x = (int)((interceptR - interceptL) / (gradientL - gradientR));
@@ -208,27 +210,44 @@ int main()
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
 
+			// left Point detection 
+
+			// leftLine : first linear equation
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;					// y-intercept
+
+			// leftPoint : nodePoint of two equation
+			leftP.x = (int)-(interceptL / gradientL);
+			leftP.y = (int)(gradientL * leftP.x + interceptL);
+
 			value = floor(abs((300 / 15)*(48 - thetaL)));
 
-
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
-
-		//	softPwmWrite(PWM, 10);
+			line(image, pt2, leftP, Scalar(255, 0, 0), 2, CV_AA);
 
 			printf("***********Left Line Detect***********\n");
-			printf("leftP.x : %d, leftP.y : %d\n", pt1.x, pt1.y);
+			printf("leftP.x : %d, leftP.y : %d\n", leftP.x, leftP.y);
 			tag = 2;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
 
-			value = -floor(abs((340 / 15)*(131 - thetaR)));
+			// right Point detection 
 
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
+			// rightLine : first linear equation
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;					// y-intercept
+
+			// rightPoint : nodePoint of two equation
+			rightP.x = (int)-(interceptR / gradientR);
+			rightP.y = (int)(gradientR * rightP.x + interceptR);
+
+			value = -floor(abs((340 / 15)*(131 - thetaR)));j
+
+			line(image, pt3, rightP, Scalar(255, 0, 0), 2, CV_AA);
 
 			printf("***********Right Line Detect***********\n");
-			printf("rightP.x : %d, rightP.y : %d\n", pt4.x, pt4.y);
+			printf("rightP.x : %d, rightP.y : %d\n", rightP.x, rightP.y);
 			tag = 3;
 		}
 
@@ -257,7 +276,7 @@ int main()
 		int input = standard + value;
 
 		if (b_value !=  value) {
-			printf("input : %d, thetaL : %0.2f, thetaR : %0.2f\n", input, thetaL, thetaR);
+//			printf("input : %d, thetaL : %0.2f, thetaR : %0.2f\n", input, thetaL, thetaR);
 		}
 
 		b_value = value;
