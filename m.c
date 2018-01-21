@@ -3,12 +3,12 @@
 #include <softPwm.h>
 
 
-#define PWM 21 // pwm 1pin
+#define PWM 1 // pwm 1pin
 #define DIR 22 // 
 #define ENABLE 23 // 
 #define LEDT 6 // led
 
-#define SERVO 1
+#define SERVO 26
 
 int main (void)
 {

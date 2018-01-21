@@ -57,8 +57,6 @@ int main()
 		int k = waitKey(1);
 		if (k == 27)
 			break;
-		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
 
 	} // While End 
 

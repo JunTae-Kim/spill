@@ -95,7 +95,7 @@ int main()
 
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 320, 350);
+		Canny(image, edgeimg, 280, 310);
 
 		for (int y=ROI_heightH; y<ROI_heightL; y++){
 			for (int x = ROI_widthL - (y - ROI_heightH); x < width/2; x++){
