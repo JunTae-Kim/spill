@@ -1,6 +1,5 @@
 #include <opencv2/opencv.hpp>
 #include <iostream>
-#include <raspicam/raspicam_cv.h>
 #include <opencv/cv.hpp>
 #include <opencv2/highgui.hpp>
 #include <math.h>
