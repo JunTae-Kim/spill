@@ -1,26 +1,26 @@
 #include <stdio.h>
 #include <wiringPi.h>
 
-#define PIR 25
+#define PIR1 25
 
 int main(void)
-{
-	if(wiringPiSetup() == -1)
-	return 1;
-
-	pinMode(PIR, INPUT);
-
-	for(;;)
 	{
-		if(digitakRead(PIR) == 0)
+		if(wiringPiSetup() == -1)
+		return 1;
+
+		pinMode(PIR1, INPUT);
+
+		for(;;)
 		{
-		printf("Detection\n");
-		delay(1000);
-		}
-		else(
+			if(digitalRead(PIR1) == 0)
+			{
+			printf("Detection\n");
+			delay(500);
+			}
+			else{
 			printf("Not Detected\n");
-			delay(1000);
+			delay(500);
+			}
+		}
+	return 0;
 	}
-}
-return 0;
-}

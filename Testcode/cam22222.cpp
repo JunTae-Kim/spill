@@ -17,7 +17,6 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-
 	int ROI_widthL = floor(width/4);
 	int ROI_widthR = floor(width*3/4);
 	int ROI_heightH = floor(height/4);
@@ -49,14 +48,14 @@ int main()
 		return -1;
 	}	
 
-	Mat image, grayimg, edgeimg, blurimg, closeimg, openimg, dilimg, erimg;
+	Mat image, edgeimg, curve_edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
 	/* ROI image */
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
-			if (y >= 120 && y < 240){
-				if (x >= (80 - (y - 120)) && x <= (240 + (y - 120))){
+			if (y >= ROI_heightH && y <= ROI_heightL){
+				if (x >= (ROI_widthL - (y - ROI_heightH)) && x <= (ROI_widthR + (y - ROI_heightH))){
 					ROIimg.at<uchar>(y,x) = 255;
 				}
 			}
@@ -64,39 +63,54 @@ int main()
 	}
 	/* ROI image end */
 
-
 	bool do_flip = false;
 
 	vector<Vec2f> lines;
 
 	while (1) {
+		t1 = getTickCount();
+
 		cam.grab();
 		cam.retrieve(image);
 
 		if (do_flip)
 			flip(image, image, -1);
 
-		cvtColor(image, grayimg, CV_BGR2GRAY);
-		GaussianBlur(grayimg, blurimg, Size(3, 3), 0, 0);
+		cvtColor(image, image, CV_BGR2GRAY);
+		GaussianBlur(image, image, Size(3, 3), 0, 0);
+		Canny(image, edgeimg, 320, 350);
 
-		Canny(blurimg, edgeimg, 100, 300);
-
-		int element_shape = MORPH_RECT;
-		Mat element = getStructuringElement(element_shape, Size(3,3));
-		Mat element2 = getStructuringElement(element_shape, Size(5,5));
-
-
-		dilate(edgeimg, dilimg, element);
-		dilate(dilimg, dilimg, element);
-		morphologyEx(dilimg, closeimg, MORPH_CLOSE, element);
-		erode(closeimg, erimg, element2);
-		erode(erimg, erimg, element2); 
-
-		t1 = getTickCount();
+		for (int y=ROI_heightH; y<ROI_heightL; y++){
+			for (int x = width/2; x > ROI_widthL - (y - ROI_heightH); x--){
+				if (edgeimg.at<uchar>(y,x) == 255) {
+					x1 = x;
+					y1 = y;
+					break;
+				}
+				x1 = x;
+				y1 = y;
+			}
+			for (int x = width/2; x < ROI_widthR + (y - ROI_heightH); x++){
+				if (edgeimg.at<uchar>(y,x) == 255) {
+					x2 = x;
+					break;
+				}
+				x2 = x;
+			}
+			if ((x1 != ROI_widthR + (y - ROI_heightH) + 1) && (x2 != ROI_widthL - (y - ROI_heightH) - 1)){
+				for (x1-=1; x1 < 0; x1--){
+					edgeimg.at<uchar>(y1,x1) = 0;
+				}
+				for (x2+=1; x2 < 320; x2++){
+					edgeimg.at<uchar>(y1,x1) = 0;
+				}
+			}
+			
+		}
 
 		for (int y=0; y<height; y++){
 			for (int x=0; x<width; x++){
-				erimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & erimg.at<uchar>(y,x);
+				edgeimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & edgeimg.at<uchar>(y,x);
 			}
 		}
 
@@ -105,7 +119,7 @@ int main()
 		y1 = 0;
 
 		/* Houghline detection */
-		HoughLines(erimg, lines, 1, CV_PI / 180, 30, 0, 0);
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 20, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
@@ -140,7 +154,7 @@ int main()
 				tag = 0;
 			}
 
-			else if (theta<3.14 && theta>=1.57)
+			else if (theta<3.14 && theta>=2.0)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -167,51 +181,75 @@ int main()
 		}
 
 		// forward 
-		else if (pt1.x != 0 && pt3.x != 0) { 
+		else if (pt1.x != 0 && pt3.x != 0) {
 
 			// banish Point detection 
 
 			// leftLine : first linear equation
-			float leftLineA = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);	//기울기
-			float leftLineB = pt2.y - leftLineA * pt2.x;						//y절편
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
 
 			// rightLine : first linear equation
-			float rightLineA = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);
-			float rightLineB = pt4.y - rightLineA * pt4.x;
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
 
 			// banishPoint : nodePoint of two equation
-			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
-			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
-
-			value = (160 - banishP.x)*2;
-
+			banishP.x = (int)((interceptR - interceptL) / (gradientL - gradientR));
+			banishP.y = (int)(gradientL * banishP.x + interceptL);
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
+			value = (160 - banishP.x) * 2;
+
 			printf("***********Both Line Detect***********\n");
+			printf("banishP.x : %d, value : %d\n", banishP.x, value);
 			tag = 1;
 		}
 
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-			value = floor(abs((300 / 15)*(48 - thetaL)));
+			// left Point detection 
+
+			// leftLine : first linear equation
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
+
+			// leftPoint : nodePoint of two equation
+			leftP.x = (int)(interceptL / gradientL);
+			leftP.y = (int)(gradientL * leftP.x + interceptL);
+			line(image, pt2, leftP, Scalar(255, 0, 0), 2, CV_AA);
+
+			value = (160 - leftP.x) * 2;
 
 			printf("***********Left Line Detect***********\n");
+			printf("leftP.x : %d, value : %d\n", leftP.x, value);
 			tag = 2;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			value = -floor(abs((340 / 15)*(131 - thetaR)));
+			// right Point detection 
+
+			// rightLine : first linear equation
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
+
+			// rightPoint : nodePoint of two equation
+			rightP.x = (int)(interceptR / gradientR);
+			rightP.y = (int)(gradientR * rightP.x + interceptR);
+
+			value = -(160 - rightP.x) * 2;
+
+			line(image, pt3, rightP, Scalar(255, 0, 0), 2, CV_AA);
 
 			printf("***********Right Line Detect***********\n");
+			printf("rightP.x : %d, value : %d\n", rightP.x, value);
 			tag = 3;
 		}
 
+		// value normalization
 		if (value >= -50 && value <= 50) {
 			value = 0;
 		}
@@ -233,30 +271,23 @@ int main()
 		else if (value > 250) {
 			value = 3;
 		}
-	//	else {
-	//		value = 0;
-	//	}
-
-		int input = standard + value;
+		else {
+			value = 0;
+		}
 
 		if (b_value !=  value) {
-			printf("input : %d, thetaL : %0.2f, thetaR : %0.2f\n", input, thetaL, thetaR);
+			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
 		}
 
 		b_value = value;
-		thetaL=0;
-		thetaR=0;
-		tag=1;
+		/* Servo controll end */
+
+		imshow("Camera1", image);
+		imshow("Camera2", edgeimg);
+//		imshow("Camera4", ROIimg);
 
 		t2 = getTickCount();
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
-
-
-		imshow("image", image);
-		imshow("closeimg", closeimg);
-		imshow("edgeimg", edgeimg);
-		imshow("erimg", erimg);
-		imshow("ROIimg", ROIimg);
 
 		int k = waitKey(1);
 		if (k == 27)

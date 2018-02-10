@@ -6,7 +6,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <wiringPi.h>
+#include <softPwm.h>
 
+#define SERVO 26
+#define PWM 1
+#define DIR 22
+#define RANGE 200
 #define standard 8
 #define pi 3.141592
 
@@ -17,10 +23,9 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-
 	int ROI_widthL = floor(width/4);
 	int ROI_widthR = floor(width*3/4);
-	int ROI_heightH = floor(height/4);
+	int ROI_heightH = floor(height/2);
 	int ROI_heightL = floor(height*3/4);
 
 	int value = 0;
@@ -49,14 +54,26 @@ int main()
 		return -1;
 	}	
 
-	Mat image, grayimg, edgeimg, blurimg, closeimg, openimg, dilimg, erimg;
+	if (wiringPiSetup() == -1) return 1; //wiringPi error
+
+//	softServoSetup(SERVO, -1, -1, -1, -1, -1, -1, -1);
+	pinMode(SERVO, OUTPUT);
+	pinMode(PWM, PWM_OUTPUT);
+	pinMode(DIR, OUTPUT);
+
+	softPwmCreate(SERVO, 0, RANGE);
+	softPwmCreate(PWM, 0, RANGE);
+
+	digitalWrite(DIR, HIGH);
+
+	Mat image, grayimg, edgeimg, blurimg, closeimg, dilimg, erimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
 	/* ROI image */
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
-			if (y >= 120 && y < 240){
-				if (x >= (80 - (y - 120)) && x <= (240 + (y - 120))){
+			if (y >= ROI_heightH && y <= ROI_heightL){
+				if (x >= (ROI_widthL - (y - ROI_heightH)) && x <= (ROI_widthR + (y - ROI_heightH))){
 					ROIimg.at<uchar>(y,x) = 255;
 				}
 			}
@@ -64,12 +81,13 @@ int main()
 	}
 	/* ROI image end */
 
-
 	bool do_flip = false;
 
 	vector<Vec2f> lines;
 
 	while (1) {
+		t1 = getTickCount();
+
 		cam.grab();
 		cam.retrieve(image);
 
@@ -92,8 +110,6 @@ int main()
 		erode(closeimg, erimg, element2);
 		erode(erimg, erimg, element2); 
 
-		t1 = getTickCount();
-
 		for (int y=0; y<height; y++){
 			for (int x=0; x<width; x++){
 				erimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & erimg.at<uchar>(y,x);
@@ -105,7 +121,7 @@ int main()
 		y1 = 0;
 
 		/* Houghline detection */
-		HoughLines(erimg, lines, 1, CV_PI / 180, 30, 0, 0);
+		HoughLines(erimg, lines, 1, CV_PI / 180, 50, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
@@ -140,7 +156,7 @@ int main()
 				tag = 0;
 			}
 
-			else if (theta<3.14 && theta>=1.57)
+			else if (theta<3.14 && theta>=2.0)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -167,51 +183,78 @@ int main()
 		}
 
 		// forward 
-		else if (pt1.x != 0 && pt3.x != 0) { 
+		else if (pt1.x != 0 && pt3.x != 0) {
 
 			// banish Point detection 
 
 			// leftLine : first linear equation
-			float leftLineA = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);	//기울기
-			float leftLineB = pt2.y - leftLineA * pt2.x;						//y절편
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
 
 			// rightLine : first linear equation
-			float rightLineA = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);
-			float rightLineB = pt4.y - rightLineA * pt4.x;
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
 
 			// banishPoint : nodePoint of two equation
-			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
-			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
-
-			value = (160 - banishP.x)*2;
-
+			banishP.x = (int)((interceptR - interceptL) / (gradientL - gradientR));
+			banishP.y = (int)(gradientL * banishP.x + interceptL);
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
+			value = (160 - banishP.x) * 2;
+			softPwmWrite(PWM, 20);
+
 			printf("***********Both Line Detect***********\n");
+			printf("banishP.x : %d, banishP.y : %d, value : %d\n", banishP.x, banishP.y, value);
 			tag = 1;
 		}
 
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
-			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
-			value = floor(abs((300 / 15)*(48 - thetaL)));
+			// left Point detection 
+
+			// leftLine : first linear equation
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
+			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
+
+			// leftPoint : nodePoint of two equation
+			leftP.x = (int)(interceptL / gradientL);
+			leftP.y = (int)(gradientL * leftP.x + interceptL);
+			line(image, pt2, leftP, Scalar(255, 0, 0), 2, CV_AA);
+
+			value = (160 - leftP.x) * 2;
+			softPwmWrite(PWM, 20);
 
 			printf("***********Left Line Detect***********\n");
+			printf("leftP.x : %d, leftP.y : %d, value : %d\n", leftP.x, leftP.y, value);
 			tag = 2;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
-			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
-			value = -floor(abs((340 / 15)*(131 - thetaR)));
+			// right Point detection 
+
+			// rightLine : first linear equation
+			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
+			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
+
+			// rightPoint : nodePoint of two equation
+			rightP.x = (int)(interceptR / gradientR);
+			rightP.y = (int)(gradientR * rightP.x + interceptR);
+
+			value = -(160 - rightP.x) * 2;
+
+			line(image, pt3, rightP, Scalar(255, 0, 0), 2, CV_AA);
+			softPwmWrite(PWM, 20);
 
 			printf("***********Right Line Detect***********\n");
+			printf("rightP.x : %d, rightP.y : %d, value : %d\n", rightP.x, rightP.y, value);
 			tag = 3;
 		}
 
+		// value normalization
 		if (value >= -50 && value <= 50) {
 			value = 0;
 		}
@@ -233,30 +276,26 @@ int main()
 		else if (value > 250) {
 			value = 3;
 		}
-	//	else {
-	//		value = 0;
-	//	}
+		else {
+			value = 0;
+		}
 
-		int input = standard + value;
+		softPwmWrite(SERVO, 0);
 
 		if (b_value !=  value) {
-			printf("input : %d, thetaL : %0.2f, thetaR : %0.2f\n", input, thetaL, thetaR);
+			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
+			softPwmWrite(SERVO, (standard + value));
+			delay(100);
 		}
 
 		b_value = value;
-		thetaL=0;
-		thetaR=0;
-		tag=1;
+		/* Servo controll end */
+
+		imshow("Camera1", image);
+		imshow("Camera2", erimg);
 
 		t2 = getTickCount();
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
-
-
-		imshow("image", image);
-		imshow("closeimg", closeimg);
-		imshow("edgeimg", edgeimg);
-		imshow("erimg", erimg);
-		imshow("ROIimg", ROIimg);
 
 		int k = waitKey(1);
 		if (k == 27)
@@ -266,6 +305,7 @@ int main()
 
 	}
 
+	softPwmWrite(PWM, 0);
 	cam.release();
 	destroyAllWindows();
 

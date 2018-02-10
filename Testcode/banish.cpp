@@ -17,10 +17,11 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-	int ROI_widthL = floor(width / 4);
-	int ROI_widthR = floor(width * 3 / 4);
-	int ROI_heightH = floor(height / 4);
-	int ROI_heightL = floor(height * 3 / 4);
+
+	int ROI_widthL = floor(width/4);
+	int ROI_widthR = floor(width*3/4);
+	int ROI_heightH = floor(height/4);
+	int ROI_heightL = floor(height*3/4);
 
 	int value = 0;
 	int b_value = 0;
@@ -30,10 +31,12 @@ int main()
 	float thetaL, thetaR;
 	Point pt1, pt2;		//left line  : up_point, down_point
 	Point pt4, pt3;		//right line : up_point, down_point
-	Point banishP;		//banish point
 	Point leftP;		//left point
 	Point rightP;		//right point
+	Point banishP;		//banish point
 	int x1 = 0, y1 = 0, x2 = 0;
+
+	Size framesize(width, height);
 
 	raspicam::RaspiCam_Cv cam;
 
@@ -44,17 +47,17 @@ int main()
 	if (!cam.open()) {
 		cerr << "Camera open failed!" << endl;
 		return -1;
-	}
+	}	
 
-	Mat image, edgeimg, curve_edgeimg;
+	Mat image, grayimg, edgeimg, blurimg, closeimg, openimg, dilimg, erimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
 	/* ROI image */
-	for (int y = 0; y<height; y++) {
-		for (int x = 0; x<width; x++) {
-			if (y >= ROI_heightH && y <= ROI_heightL) {
-				if (x >= (ROI_widthL - (y - ROI_heightH)) && x <= (ROI_widthR + (y - ROI_heightH))) {
-					ROIimg.at<uchar>(y, x) = 255;
+	for (int y=0; y<height; y++){
+		for (int x=0; x<width; x++){
+			if (y >= 120 && y < 240){
+				if (x >= (80 - (y - 120)) && x <= (240 + (y - 120))){
+					ROIimg.at<uchar>(y,x) = 255;
 				}
 			}
 		}
@@ -67,49 +70,33 @@ int main()
 	vector<Vec2f> lines;
 
 	while (1) {
-		t1 = getTickCount();
-
 		cam.grab();
 		cam.retrieve(image);
 
 		if (do_flip)
 			flip(image, image, -1);
 
-		cvtColor(image, image, CV_BGR2GRAY);
-		GaussianBlur(image, image, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 320, 350);
+		cvtColor(image, grayimg, CV_BGR2GRAY);
+		GaussianBlur(grayimg, blurimg, Size(3, 3), 0, 0);
 
-		for (int y=ROI_heightH; y<ROI_heightL; y++){
-			for (int x = width/2; x > ROI_widthL - (y - ROI_heightH); x--){
-				if (edgeimg.at<uchar>(y,x) == 255) {
-					x1 = x;
-					y1 = y;
-					break;
-				}
-				x1 = x;
-				y1 = y;
-			}
-			for (int x = width/2; x < ROI_widthR + (y - ROI_heightH); x++){
-				if (edgeimg.at<uchar>(y,x) == 255) {
-					x2 = x;
-					break;
-				}
-				x2 = x;
-			}
-			if ((x1 != ROI_widthR + (y - ROI_heightH) + 1) && (x2 != ROI_widthL - (y - ROI_heightH) - 1)){
-				for (x1-=1; x1 < 0; x1--){
-					edgeimg.at<uchar>(y1,x1) = 0;
-				}
-				for (x2+=1; x2 < 320; x2++){
-					edgeimg.at<uchar>(y1,x1) = 0;
-				}
-			}
-			
-		}
+		Canny(blurimg, edgeimg, 100, 300);
 
-		for (int y = 0; y<height; y++) {
-			for (int x = 0; x<width; x++) {
-				edgeimg.at<uchar>(y, x) = ROIimg.at<uchar>(y, x) & edgeimg.at<uchar>(y, x);
+		int element_shape = MORPH_RECT;
+		Mat element = getStructuringElement(element_shape, Size(3,3));
+		Mat element2 = getStructuringElement(element_shape, Size(5,5));
+
+
+		dilate(edgeimg, dilimg, element);
+		dilate(dilimg, dilimg, element);
+		morphologyEx(dilimg, closeimg, MORPH_CLOSE, element);
+		erode(closeimg, erimg, element2);
+		erode(erimg, erimg, element2); 
+
+		t1 = getTickCount();
+
+		for (int y=0; y<height; y++){
+			for (int x=0; x<width; x++){
+				erimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & erimg.at<uchar>(y,x);
 			}
 		}
 
@@ -118,27 +105,27 @@ int main()
 		y1 = 0;
 
 		/* Houghline detection */
-		HoughLines(edgeimg, lines, 1, CV_PI / 180, 30, 0, 0);
+		HoughLines(erimg, lines, 1, CV_PI / 180, 30, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
 			float rho = lines[i][0], theta = lines[i][1];
 			float rho1, rho2;
 			int length = 800;
-
+			
 			if (tag != 0)
 			{
-				pt1.x = 0;
-				pt1.y = 0;
-				pt2.x = 0;
-				pt2.y = 0;
-				pt3.x = 0;
-				pt3.y = 0;
-				pt4.x = 0;
-				pt4.y = 0;
+				pt1.x=0;
+				pt1.y=0;
+				pt2.x=0;
+				pt2.y=0;
+				pt3.x=0;
+				pt3.y=0;
+				pt4.x=0;
+				pt4.y=0;
 			}
 
-			if (theta<1.5 && theta >= 0)
+			if (theta<1.5 && theta>=0)
 			{
 				theta1 = theta;
 				rho1 = rho;
@@ -153,7 +140,7 @@ int main()
 				tag = 0;
 			}
 
-			else if (theta<3.14 && theta >= 1.57)
+			else if (theta<3.14 && theta>=1.57)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -180,73 +167,48 @@ int main()
 		}
 
 		// forward 
-		else if (pt1.x != 0 && pt3.x != 0) {
+		else if (pt1.x != 0 && pt3.x != 0) { 
 
 			// banish Point detection 
 
 			// leftLine : first linear equation
-			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
-			float interceptL = pt2.y - gradientL * pt2.x;					// y-intercept
+			float leftLineA = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);	//기울기
+			float leftLineB = pt2.y - leftLineA * pt2.x;						//y절편
 
 			// rightLine : first linear equation
-			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
-			float interceptR = pt4.y - gradientR * pt4.x;					// y-intercept
+			float rightLineA = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);
+			float rightLineB = pt4.y - rightLineA * pt4.x;
 
 			// banishPoint : nodePoint of two equation
-			banishP.x = (int)((interceptR - interceptL) / (gradientL - gradientR));
-			banishP.y = (int)(gradientL * banishP.x + interceptL);
+			banishP.x = (int)((rightLineB - leftLineB) / (leftLineA - rightLineA));
+			banishP.y = (int)(leftLineA * banishP.x + leftLineB);
 
-			value = (160 - banishP.x) * 2;
+			value = (160 - banishP.x)*2;
 
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
 			printf("***********Both Line Detect***********\n");
-			printf("banishP.x : %d, banishP.y : %d\n", banishP.x, banishP.y);
 			tag = 1;
 		}
 
 		// left 
 		else if (pt1.x != 0 && pt3.x == 0) { 
-
-			// left Point detection 
-
-			// leftLine : first linear equation
-			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
-			float interceptL = pt2.y - gradientL * pt2.x;					// y-intercept
-
-			// leftPoint : nodePoint of two equation
-			leftP.x = (int)-(interceptL / gradientL);
-			leftP.y = (int)(gradientL * leftP.x + interceptL);
+			line(image, pt1, pt2, Scalar(255, 0, 0), 2, CV_AA);
 
 			value = floor(abs((300 / 15)*(48 - thetaL)));
 
-			line(image, pt2, leftP, Scalar(255, 0, 0), 2, CV_AA);
-
 			printf("***********Left Line Detect***********\n");
-			printf("leftP.x : %d, leftP.y : %d\n", leftP.x, leftP.y);
 			tag = 2;
 		}
 
 		// right 
 		else if (pt1.x == 0 && pt3.x != 0) { 
-
-			// right Point detection 
-
-			// rightLine : first linear equation
-			float gradientR = (float)(pt4.y - pt3.y) / (float)(pt4.x - pt3.x);		// gradient
-			float interceptR = pt4.y - gradientR * pt4.x;					// y-intercept
-
-			// rightPoint : nodePoint of two equation
-			rightP.x = (int)-(interceptR / gradientR);
-			rightP.y = (int)(gradientR * rightP.x + interceptR);
+			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
 			value = -floor(abs((340 / 15)*(131 - thetaR)));
 
-			line(image, pt3, rightP, Scalar(255, 0, 0), 2, CV_AA);
-
 			printf("***********Right Line Detect***********\n");
-			printf("rightP.x : %d, rightP.y : %d\n", rightP.x, rightP.y);
 			tag = 3;
 		}
 
@@ -271,6 +233,9 @@ int main()
 		else if (value > 250) {
 			value = 3;
 		}
+	//	else {
+	//		value = 0;
+	//	}
 
 		int input = standard + value;
 
@@ -279,7 +244,6 @@ int main()
 		}
 
 		b_value = value;
-
 		thetaL=0;
 		thetaR=0;
 		tag=1;
@@ -288,9 +252,11 @@ int main()
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 
-		imshow("Camera1", image);
-		imshow("Camera2", edgeimg);
-		imshow("Camera3", ROIimg);
+		imshow("image", image);
+		imshow("closeimg", closeimg);
+		imshow("edgeimg", edgeimg);
+		imshow("erimg", erimg);
+		imshow("ROIimg", ROIimg);
 
 		int k = waitKey(1);
 		if (k == 27)

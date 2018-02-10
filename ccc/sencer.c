@@ -25,7 +25,7 @@ int main (int argc, char *argv[])
     while (digitalRead(echo) == 1) ;
     end_time = micros() ;
     distance = (end_time - start_time) / 29. / 2. ;
-    printf("distance %.2f cm\n", distance) ;
+    printf("distance = %.2f cm\n", distance) ;
   }
   return 0 ;
 }

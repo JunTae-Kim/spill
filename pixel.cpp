@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <wiringPi.h>
 #include <softPwm.h>
-#include <softServo.h>
 
 #define SERVO 26
 #define PWM 1
@@ -26,7 +25,7 @@ int main()
 	int height = 240;
 	int ROI_widthL = floor(width/4);
 	int ROI_widthR = floor(width*3/4);
-	int ROI_heightH = floor(height/4);
+	int ROI_heightH = floor(height/2);
 	int ROI_heightL = floor(height*3/4);
 
 	int value = 0;
@@ -65,6 +64,8 @@ int main()
 	softPwmCreate(SERVO, 0, RANGE);
 	softPwmCreate(PWM, 0, RANGE);
 
+	digitalWrite(DIR, HIGH);
+
 	Mat image, edgeimg, curve_edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
@@ -95,10 +96,11 @@ int main()
 
 		cvtColor(image, image, CV_BGR2GRAY);
 		GaussianBlur(image, image, Size(3, 3), 0, 0);
-		Canny(image, edgeimg, 320, 350);
+		Canny(image, edgeimg, 100, 200);
+
 
 		for (int y=ROI_heightH; y<ROI_heightL; y++){
-			for (int x = width/2; x > ROI_widthL - (y - ROI_heightH); x--){
+			for (int x = width/2 ; x > ROI_widthL - (y - ROI_heightH); x--){
 				if (edgeimg.at<uchar>(y,x) == 255) {
 					x1 = x;
 					y1 = y;
@@ -115,11 +117,11 @@ int main()
 				x2 = x;
 			}
 			if ((x1 != ROI_widthR + (y - ROI_heightH) + 1) && (x2 != ROI_widthL - (y - ROI_heightH) - 1)){
-				for (x1-=1; x1 < 0; x1--){
+				for (x1-=1; x1 > 0; x1--){
 					edgeimg.at<uchar>(y1,x1) = 0;
 				}
-				for (x2+=1; x2 < 320; x2++){
-					edgeimg.at<uchar>(y1,x1) = 0;
+				for (x2+=1; x2 < width; x2++){
+					edgeimg.at<uchar>(y1,x2) = 0;
 				}
 			}
 			
@@ -217,7 +219,7 @@ int main()
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
 			value = (160 - banishP.x) * 2;
-			softPwmWrite(PWM, 50);
+			softPwmWrite(PWM, 20);
 
 			printf("***********Both Line Detect***********\n");
 			printf("banishP.x : %d, value : %d\n", banishP.x, value);
@@ -239,7 +241,7 @@ int main()
 			line(image, pt2, leftP, Scalar(255, 0, 0), 2, CV_AA);
 
 			value = (160 - leftP.x) * 2;
-			softPwmWrite(PWM, 35);
+			softPwmWrite(PWM, 20);
 
 			printf("***********Left Line Detect***********\n");
 			printf("leftP.x : %d, value : %d\n", leftP.x, value);
@@ -262,7 +264,7 @@ int main()
 			value = -(160 - rightP.x) * 2;
 
 			line(image, pt3, rightP, Scalar(255, 0, 0), 2, CV_AA);
-			softPwmWrite(PWM, 35);
+			softPwmWrite(PWM, 20);
 
 			printf("***********Right Line Detect***********\n");
 			printf("rightP.x : %d, value : %d\n", rightP.x, value);
@@ -321,6 +323,7 @@ int main()
 
 	}
 
+	softPwmWrite(PWM, 0);
 	cam.release();
 	destroyAllWindows();
 

@@ -50,7 +50,7 @@ int main (void)
 //	delay(2000);
 
 	softPwmWrite(PWM, 50);
-	delay(2000);
+	delay(500);
 
 	softPwmWrite(PWM,0);
 

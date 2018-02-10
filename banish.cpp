@@ -280,7 +280,7 @@ int main()
 //		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 
-//		imshow("Camera1", image);
+		imshow("Camera1", image);
 		imshow("Camera2", edgeimg);
 //		imshow("Camera4", ROIimg);
 

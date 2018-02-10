@@ -1,8 +1,3 @@
-#include <opencv2/opencv.hpp>
-#include <iostream>
-#include <opencv/cv.hpp>
-#include <opencv2/highgui.hpp>
-#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <wiringPi.h>
@@ -10,12 +5,7 @@
 
 #define PWM 1
 #define DIR 22
-//#define ENABLE 23
 #define RANGE 100
-#define pi 3.141592
-
-using namespace cv;
-using namespace std;
 
 int main()
 {
@@ -25,40 +15,26 @@ int main()
 		return 1; //wiringPi error
 	}
 
-	bool do_flip = false;
-
 	pinMode(PWM,PWM_OUTPUT);
 	pinMode(DIR,OUTPUT);
-//	pinMode(ENABLE,OUTPUT);
+
+	digitalWrite(DIR, HIGH);
 
 	softPwmCreate(PWM,0,RANGE);
-	digitalWrite(DIR, HIGH);
 
 	while (1) 
 	{
-
-		if (waitKey(30) == 27) 
-		{
-			cout << "esc key is pressed by user" << endl;
-		}
-
 		fputs("input int  : ", stdout);
 		scanf("%d", &stri);
 
 		if (stri != 0) {
 		softPwmWrite(PWM, stri);
-		delay (1000);
+		delay (2000);
 		softPwmWrite(PWM, 0);
+
 		}
 
 		else if (stri == 0) return 0;
-
-
-		int k = waitKey(1);
-		if (k == 27)
-			break;
-		else if (k == 'f' || k == 'F')
-			do_flip = !do_flip;
 
 	} // While End 
 

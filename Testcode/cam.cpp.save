@@ -49,14 +49,14 @@ int main()
 		return -1;
 	}	
 
-	Mat image, grayimg, edgeimg, blurimg, closeimg, openimg, dilimg, erimg;
+	Mat image, edgeimg, curve_edgeimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
 	/* ROI image */
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
-			if (y >= 120 && y < 240){
-				if (x >= (80 - (y - 120)) && x <= (240 + (y - 120))){
+			if (y >= 60 && y <= 180){
+				if (x >= (80 - (y - 60)) && x <= (240 + (y - 60))){
 					ROIimg.at<uchar>(y,x) = 255;
 				}
 			}
@@ -76,27 +76,50 @@ int main()
 		if (do_flip)
 			flip(image, image, -1);
 
-		cvtColor(image, grayimg, CV_BGR2GRAY);
-		GaussianBlur(grayimg, blurimg, Size(3, 3), 0, 0);
-
-		Canny(blurimg, edgeimg, 100, 300);
-
-		int element_shape = MORPH_RECT;
-		Mat element = getStructuringElement(element_shape, Size(3,3));
-		Mat element2 = getStructuringElement(element_shape, Size(5,5));
-
-
-		dilate(edgeimg, dilimg, element);
-		dilate(dilimg, dilimg, element);
-		morphologyEx(dilimg, closeimg, MORPH_CLOSE, element);
-		erode(closeimg, erimg, element2);
-		erode(erimg, erimg, element2); 
+		cvtColor(image, image, CV_BGR2GRAY);
+		GaussianBlur(image, image, Size(3, 3), 0, 0);
+		Canny(image, edgeimg, 330, 360);
 
 		t1 = getTickCount();
 
+		for (int y=ROI_heightH; y<ROI_heightL; y++){
+			if (y > 140)
+				y = 140;
+//			for(int x = width/2; x > ROI_widthL - (y - ROI_heightH); x--){
+
+			for(int x = 160; x > 80 - (y - 60); x--){
+
+//			for (int x = 80 - (y - 60); x < 160; x++){
+				if (edgeimg.at<uchar>(y,x) == 255) {
+					x1 = x;
+					y1 = y;
+//					printf("%d!!!!!!!!!!!!!!!!!!!!!\n",x);
+					break;
+				}
+				x1 = x;
+				y1 = y;
+			}
+			for (int x = width/2; x < ROI_widthR + (y - ROI_heightH); x++){
+				if (edgeimg.at<uchar>(y,x) == 255) {
+					x2 = x;
+					break;
+				}
+				x2 = x;
+			}
+			if ((x1 != ROI_widthR + (y - ROI_heightH) + 1) && (x2 != ROI_widthL - (y - ROI_heightH) - 1)){
+				for (x1-=1; x1 < 0; x1--){
+					edgeimg.at<uchar>(y1,x1) = 0;
+				}
+				for (x2+=1; x2 < width; x2++){
+					edgeimg.at<uchar>(y1,x1) = 0;
+				}
+			}
+			
+		}
+
 		for (int y=0; y<height; y++){
 			for (int x=0; x<width; x++){
-				erimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & erimg.at<uchar>(y,x);
+				edgeimg.at<uchar>(y,x) = ROIimg.at<uchar>(y,x) & edgeimg.at<uchar>(y,x);
 			}
 		}
 
@@ -105,7 +128,7 @@ int main()
 		y1 = 0;
 
 		/* Houghline detection */
-		HoughLines(erimg, lines, 1, CV_PI / 180, 30, 0, 0);
+		HoughLines(edgeimg, lines, 1, CV_PI / 180, 30, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
@@ -252,11 +275,9 @@ int main()
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;
 
 
-		imshow("image", image);
-		imshow("closeimg", closeimg);
-		imshow("edgeimg", edgeimg);
-		imshow("erimg", erimg);
-		imshow("ROIimg", ROIimg);
+		imshow("Camera1", image);
+		imshow("Camera2", edgeimg);
+		imshow("Camera4", ROIimg);
 
 		int k = waitKey(1);
 		if (k == 27)
