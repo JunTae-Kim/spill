@@ -36,10 +36,9 @@ int main()
 	float thetaL, thetaR;
 	Point pt1, pt2;		//left line  : up_point, down_point
 	Point pt4, pt3;		//right line : up_point, down_point
-	Point leftP;		//left point
-	Point rightP;		//right point
-	Point banishP;		//banish point
-	int x1 = 0, y1 = 0, x2 = 0;
+	Point leftP1, leftP2;		//left point
+	Point rightP1, rightP2;		//right point
+	Point banishP;		//banish point;
 
 	Size framesize(width, height);
 
@@ -69,13 +68,22 @@ int main()
 	Mat image, grayimg, edgeimg, blurimg, closeimg, dilimg, erimg;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
-	/* ROI image */
+/*
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
 			if (y >= ROI_heightH && y <= ROI_heightL){
 				if (x >= (ROI_widthL - (y - ROI_heightH)) && x <= (ROI_widthR + (y - ROI_heightH))){
 					ROIimg.at<uchar>(y,x) = 255;
 				}
+			}
+		}
+	}
+*/
+	/* ROI image */
+	for (int y=0; y<height; y++){
+		for (int x=0; x<width; x++){
+			if (y >= ROI_heightH && y <= ROI_heightL){
+				ROIimg.at<uchar>(y,x) = 255;
 			}
 		}
 	}
@@ -100,14 +108,14 @@ int main()
 		Canny(blurimg, edgeimg, 100, 300);
 
 		int element_shape = MORPH_RECT;
-		Mat element = getStructuringElement(element_shape, Size(3,3));
+		Mat element1 = getStructuringElement(element_shape, Size(3,3));
 		Mat element2 = getStructuringElement(element_shape, Size(5,5));
 
 
-		dilate(edgeimg, dilimg, element);
-		dilate(dilimg, dilimg, element);
-		morphologyEx(dilimg, closeimg, MORPH_CLOSE, element);
-		erode(closeimg, erimg, element2);
+		dilate(edgeimg, dilimg, element1);
+		dilate(dilimg, dilimg, element1);
+		morphologyEx(dilimg, closeimg, MORPH_CLOSE, element1);
+		erode(closeimg, erimg, element1);
 		erode(erimg, erimg, element2); 
 
 		for (int y=0; y<height; y++){
@@ -116,12 +124,8 @@ int main()
 			}
 		}
 
-		x1 = 0;
-		x2 = 0;
-		y1 = 0;
-
 		/* Houghline detection */
-		HoughLines(erimg, lines, 1, CV_PI / 180, 50, 0, 0);
+		HoughLines(erimg, lines, 1, CV_PI / 180, 70, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
@@ -139,9 +143,17 @@ int main()
 				pt3.y=0;
 				pt4.x=0;
 				pt4.y=0;
+				leftP1.x=0;
+				leftP1.y=0;
+				leftP2.x=0;
+				leftP2.y=0;
+				rightP1.x=0;
+				rightP1.y=0;
+				rightP2.x=0;
+				rightP2.y=0;
 			}
 
-			if (theta<1.5 && theta>=0)
+			if (theta<1.35 && theta>=0)
 			{
 				theta1 = theta;
 				rho1 = rho;
@@ -201,11 +213,19 @@ int main()
 			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
 			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
 
-			value = (160 - banishP.x) * 2;
-			softPwmWrite(PWM, 20);
+			float b1 = pt2.y - gradientL * pt2.x;
+			leftP2.y = height;
+			leftP2.x = (leftP2.y - b1) / gradientL;
+
+			float b2 = pt3.y - gradientR * pt3.x;
+			rightP2.y = height;
+			rightP2.x = (rightP2.y - b2) / gradientR;
+
+			softPwmWrite(PWM, 23);
 
 			printf("***********Both Line Detect***********\n");
-			printf("banishP.x : %d, banishP.y : %d, value : %d\n", banishP.x, banishP.y, value);
+			printf("banishP.x : %d, banishP.y : %d\n", banishP.x, banishP.y);
+			printf("leftP2.x : %d, rightP2.x : %d\n", leftP2.x, rightP2.x);
 			tag = 1;
 		}
 
@@ -215,19 +235,23 @@ int main()
 			// left Point detection 
 
 			// leftLine : first linear equation
-			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient 
-			float interceptL = pt2.y - gradientL * pt2.x;							// y-intercept
+			float gradientL = (float)(pt2.y - pt1.y) / (float)(pt2.x - pt1.x);		// gradient
+			float interceptL = pt2.y - gradientL * pt2.x;					// y-intercept
 
 			// leftPoint : nodePoint of two equation
-			leftP.x = (int)(interceptL / gradientL);
-			leftP.y = (int)(gradientL * leftP.x + interceptL);
-			line(image, pt2, leftP, Scalar(255, 0, 0), 2, CV_AA);
+			leftP1.x = (int)(interceptL / -gradientL);
+			leftP1.y = (int)(gradientL * leftP1.x + interceptL);
+			line(image, pt2, leftP1, Scalar(255, 0, 0), 2, CV_AA);
 
-			value = (160 - leftP.x) * 2;
-			softPwmWrite(PWM, 20);
+			float b1 = leftP1.y - gradientL * leftP1.x;
+			leftP2.y = height;
+			leftP2.x = (leftP2.y - b1) / gradientL;
+
+			softPwmWrite(PWM, 23);
 
 			printf("***********Left Line Detect***********\n");
-			printf("leftP.x : %d, leftP.y : %d, value : %d\n", leftP.x, leftP.y, value);
+			printf("leftP1.x : %d, leftP1.y : %d\n", leftP1.x, leftP1.y);
+//			printf("leftP2.x : %d, leftP2.y : %d\n", leftP2.x, leftP2.y);
 			tag = 2;
 		}
 
@@ -241,40 +265,61 @@ int main()
 			float interceptR = pt4.y - gradientR * pt4.x;							// y-intercept
 
 			// rightPoint : nodePoint of two equation
-			rightP.x = (int)(interceptR / gradientR);
-			rightP.y = (int)(gradientR * rightP.x + interceptR);
+			rightP1.x = (int)(interceptR / -gradientR);
+			rightP1.y = (int)(gradientR * rightP1.x + interceptR);
 
-			value = -(160 - rightP.x) * 2;
+			float b2 = rightP1.y - gradientR * rightP1.x;
+			rightP2.y = height;
+			rightP2.x = (rightP2.y - b2) / gradientR;
 
-			line(image, pt3, rightP, Scalar(255, 0, 0), 2, CV_AA);
-			softPwmWrite(PWM, 20);
+			line(image, pt3, rightP1, Scalar(0, 0, 255), 2, CV_AA);
+
+			softPwmWrite(PWM, 23);
 
 			printf("***********Right Line Detect***********\n");
-			printf("rightP.x : %d, rightP.y : %d, value : %d\n", rightP.x, rightP.y, value);
+			printf("rightP1.x - rightP2.x : %d\n", rightP1.x - rightP2.x);
+			printf("rightP1.x : %d, rightP1.y : %d\n", rightP1.x, rightP1.y);
+			printf("rightP2.x : %d, rightP2.y : %d\n", rightP2.x, rightP2.y);
 			tag = 3;
 		}
 
 		// value normalization
-		if (value >= -50 && value <= 50) {
+		if (leftP2.x <= 0 && rightP2.x >= 320) {
 			value = 0;
 		}
-		else if (value >= -150 && value < -50) {
-			value = -1;
-		}
-		else if (value >= -250 && value < -150) {
-			value = -2;
-		}
-		else if (value < -250) {
-			value = -3;
-		}
-		else if (value > 50 && value <= 150) {
+		else if (leftP2.x > 0 && leftP2.x <= 80) {
 			value = 1;
 		}
-		else if (value > 150 && value <= 250) {
+		else if (leftP2.x > 80 && leftP2.x < 120) {
 			value = 2;
 		}
-		else if (value > 250) {
+		else if (leftP2.x > 120 && leftP2.x <= 200) {
 			value = 3;
+		}
+		else if (rightP2.x > 120 && rightP2.x <= 200) {
+			value = -3;
+		}
+		else if (rightP2.x >= 200 && rightP2.x < 240) {
+			value = -2;
+		}
+		else if (rightP2.x >= 240 && rightP2.x < 320) {
+			value = -1;
+		}
+		else if (leftP1.x >= 200 && leftP1.x <= 400) {
+			value = 2;
+			softPwmWrite(PWM, 25);
+		}
+		else if (leftP1.x > 400) {
+			value = 3;
+			softPwmWrite(PWM, 25);
+		}
+		else if (rightP1.x < 120 && rightP1.x >= -80) {
+			value = -2;
+			softPwmWrite(PWM, 25);
+		}
+		else if (rightP1.x > -80) {
+			value = -3;
+			softPwmWrite(PWM, 25);
 		}
 		else {
 			value = 0;
