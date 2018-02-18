@@ -31,11 +31,11 @@ int main (int argc, char *argv[])
     digitalWrite(trig1, LOW) ;
     digitalWrite(trig2, LOW) ;
     digitalWrite(trig3, LOW) ;
-    delay(500) ;
+    delay(10) ;
     digitalWrite(trig1, HIGH) ;
     digitalWrite(trig2, HIGH) ;
     digitalWrite(trig3, HIGH) ;
-    delayMicroseconds(10) ;
+    delay(10) ;
 
     digitalWrite(trig1, LOW) ;
     digitalWrite(trig2, LOW) ;
