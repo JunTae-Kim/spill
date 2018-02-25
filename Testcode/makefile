@@ -1,17 +1,15 @@
 CC = g++
 CFLAGS = -g -Wall
-SRCS = banish.cpp
+SRCS = cam.cpp
 PROG = $(notdir $(CURDIR))
 
 OPENCV = `pkg-config opencv --cflags --libs`
 LASPICAM = -lraspicam -lraspicam_cv
 LIBS = $(OPENCV) $(LASPICAM)
-WIRINGPI = '-lwiringPi'
-LOCATION = '/home/pi/wiringPi/wiringPi/softServo.c'
 .PHONY: all clean
 
 $(PROG):$(SRCS)
-	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS) $(LOCATION) $(WIRINGPI)
+	$(CC) $(CFLAGS) -o $(PROG) $(SRCS) $(LIBS)
 
 all: $(PROG)
 

@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <wiringPi.h>
 #include <softPwm.h>
 
@@ -11,25 +12,30 @@ int main(void)
 		if(wiringPiSetup() == -1)
 		return 1;
 
-		pinMode(PWM, PWM_OUTPUT);
-		pinMode(DIR, OUTPUT);
 		pinMode(PIR1, INPUT);
+		pinMode(PWM, PWM_OUTPUT);
+		pinMOde(DIR, OUTPUT);
 
-		digitalWrite(PWM,LOW);
-
-		softPwmCreate(PWM, 0, 100);
+		digitalWrite(PWM, LOW);
 		digitalWrite(DIR, HIGH);
-		softPwmWrite(PWM, 5);
+
+		softPwmCreate(PWM,0,30);
+
+
 		for(;;)
+
 		{
 			if(digitalRead(PIR1) == 0)
 			{
-			printf("First Detection\n");
-			softPwmWrite(PWM, 2);
+			printf("Detection\n");
+			softPwmWrite(PWM, 20);
 			delay(500);
 			}
-			else{
+
+			else
+			{
 			printf("Not Detected\n");
+			softPwmWrite(PWM, 30);
 			delay(500);
 			}
 		}

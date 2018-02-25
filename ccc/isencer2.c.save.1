@@ -24,14 +24,15 @@ int main(void)
 		{
 			if(digitalRead(PIR1) == 0)
 			{
-			printf("First Detection\n");
+			printf("slow\n");
 			softPwmWrite(PWM, 2);
 			delay(500);
 			}
 			else{
-			printf("Not Detected\n");
+			printf("\n");
 			delay(500);
 			}
 		}
+
 	return 0;
 	}
