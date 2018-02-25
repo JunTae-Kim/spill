@@ -227,7 +227,7 @@ int main()
 			printf("leftP1.x : %d,\t leftP1.y : %d\n", leftP1.x, leftP1.y);
 			printf("leftP2.x : %d,\t leftP2.y : %d\n", leftP2.x, leftP2.y);
 
-			//fprintf(fp,"leftP1.x : %d,\t leftP1.y : %d\n", leftP1.x, leftP1.y);
+			fprintf(fp,"%d\t%d\n", leftP2.x, leftP2.y);
 			//fprintf(fp,"leftP2.x : %d,\t leftP2.y : %d\n", leftP2.x, leftP2.y);
 			tag = 2;
 		}
@@ -255,7 +255,7 @@ int main()
 			printf("rightP1.x : %d,\t rightP1.y : %d\n", rightP1.x, rightP1.y);
 			printf("rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 
-			fprintf(fp,"%d\t%d\n", rightP1.x, rightP1.y);
+			//fprintf(fp,"%d\t%d\n", rightP2.x, rightP2.y);
 			//fprintf(fp,"rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 			tag = 3;
 		}
