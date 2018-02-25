@@ -33,7 +33,7 @@ int main()
 	Point rightP1, rightP2;		//right point
 	Point banishP;		//banish point;
 
-	FILE *fp = fopen("/home/pi/spill/Testcode/data/value0.txt", "w");
+	FILE *fp = fopen("/home/pi/spill/Testcode/data/value3.txt", "w");
 
 	Size framesize(width, height);
 
@@ -200,7 +200,7 @@ int main()
 			printf("banishP.x : %d,\t banishP.y : %d\n", banishP.x, banishP.y);
 			printf("leftP2.x : %d,\t rightP2.x : %d\n", leftP2.x, rightP2.x);
 
-			fprintf(fp,"%d\t%d\n", leftP2.x, rightP2.x);
+			//fprintf(fp,"%d\t%d\n", leftP2.x, rightP2.x);
 			tag = 1;
 		}
 
@@ -255,7 +255,7 @@ int main()
 			printf("rightP1.x : %d,\t rightP1.y : %d\n", rightP1.x, rightP1.y);
 			printf("rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 
-			//fprintf(fp,"rightP1.x : %d,\t rightP1.y : %d\n", rightP1.x, rightP1.y);
+			fprintf(fp,"%d\t%d\n", rightP1.x, rightP1.y);
 			//fprintf(fp,"rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 			tag = 3;
 		}
