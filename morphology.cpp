@@ -23,10 +23,11 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-	int ROI_widthL = floor(width/4);
-	int ROI_widthR = floor(width*3/4);
+	int ROI_widthL = floor(width*3/8);
+	int ROI_widthR = floor(width*5/8);
 	int ROI_heightH = floor(height/2);
-	int ROI_heightL = floor(height*3/4);
+	int ROI_heightL = floor(height*5/6);
+	int count = 0;
 
 	int value = 0;
 	int b_value = 0;
@@ -65,29 +66,18 @@ int main()
 
 	digitalWrite(DIR, HIGH);
 
-	Mat image, grayimg, edgeimg, blurimg, closeimg, dilimg, erimg;
+	Mat image, grayimg, edgeimg, blurimg, closeimg, dilimg, erimg, erimg1, erimg2;
 	Mat ROIimg(height, width, CV_8UC1, Scalar(0));
 
-/*
+	/* ROI image1 */
 	for (int y=0; y<height; y++){
-		for (int x=0; x<width; x++){
-			if (y >= ROI_heightH && y <= ROI_heightL){
-				if (x >= (ROI_widthL - (y - ROI_heightH)) && x <= (ROI_widthR + (y - ROI_heightH))){
-					ROIimg.at<uchar>(y,x) = 255;
-				}
-			}
-		}
-	}
-*/
-	/* ROI image */
-	for (int y=0; y<height; y++){
-		for (int x=0; x<width; x++){
+		for (int x=0; x<ROI_widthR; x++){
 			if (y >= ROI_heightH && y <= ROI_heightL){
 				ROIimg.at<uchar>(y,x) = 255;
 			}
 		}
 	}
-	/* ROI image end */
+	/* ROI image1 end */
 
 	bool do_flip = false;
 
@@ -105,18 +95,21 @@ int main()
 		cvtColor(image, grayimg, CV_BGR2GRAY);
 		GaussianBlur(grayimg, blurimg, Size(3, 3), 0, 0);
 
-		Canny(blurimg, edgeimg, 100, 300);
+		Canny(blurimg, edgeimg, 200, 300);
 
 		int element_shape = MORPH_RECT;
 		Mat element1 = getStructuringElement(element_shape, Size(3,3));
-		Mat element2 = getStructuringElement(element_shape, Size(5,5));
+		Mat element2 = getStructuringElement(element_shape, Size(7,7));
 
 
-		dilate(edgeimg, dilimg, element1);
-		dilate(dilimg, dilimg, element1);
-		morphologyEx(dilimg, closeimg, MORPH_CLOSE, element1);
+		//dilate(edgeimg, dilimg, element1);
+		//dilate(dilimg, dilimg, element1);
+		//morphologyEx(dilimg, closeimg, MORPH_CLOSE, element1);
+		//erode(closeimg, erimg, element2);
+		//erode(erimg, erimg, element2); 
+
+		morphologyEx(edgeimg, closeimg, MORPH_CLOSE, element2);
 		erode(closeimg, erimg, element1);
-		erode(erimg, erimg, element2); 
 
 		for (int y=0; y<height; y++){
 			for (int x=0; x<width; x++){
@@ -124,8 +117,9 @@ int main()
 			}
 		}
 
+
 		/* Houghline detection */
-		HoughLines(erimg, lines, 1, CV_PI / 180, 70, 0, 0);
+		HoughLines(erimg, lines, 1, CV_PI / 180, 50, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
@@ -145,15 +139,15 @@ int main()
 				pt4.y=0;
 				leftP1.x=0;
 				leftP1.y=0;
-				leftP2.x=0;
+				leftP2.x=500;
 				leftP2.y=0;
-				rightP1.x=0;
+				rightP1.x=500;
 				rightP1.y=0;
 				rightP2.x=0;
 				rightP2.y=0;
 			}
 
-			if (theta<1.35 && theta>=0)
+			if (theta<1.45 && theta>=0)
 			{
 				theta1 = theta;
 				rho1 = rho;
@@ -168,7 +162,7 @@ int main()
 				tag = 0;
 			}
 
-			else if (theta<3.14 && theta>=2.0)
+			else if (theta<3.14 && theta>=1.7)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -183,11 +177,8 @@ int main()
 				tag = 0;
 			}
 		}
-		theta1 = 1.57 - theta1;
-		theta2 = 4.71 - theta2;
-		thetaL = theta1 * 180 / pi;
-		thetaR = theta2 * 180 / pi;
 		/* Houghline detection end */
+
 
 		/* Servo controll */
 		if (waitKey(30) == 27) {
@@ -221,7 +212,7 @@ int main()
 			rightP2.y = height;
 			rightP2.x = (rightP2.y - b2) / gradientR;
 
-			softPwmWrite(PWM, 23);
+			softPwmWrite(PWM, 26);
 
 			printf("***********Both Line Detect***********\n");
 			printf("banishP.x : %d, banishP.y : %d\n", banishP.x, banishP.y);
@@ -247,11 +238,11 @@ int main()
 			leftP2.y = height;
 			leftP2.x = (leftP2.y - b1) / gradientL;
 
-			softPwmWrite(PWM, 23);
+			softPwmWrite(PWM, 24);
 
 			printf("***********Left Line Detect***********\n");
 			printf("leftP1.x : %d, leftP1.y : %d\n", leftP1.x, leftP1.y);
-//			printf("leftP2.x : %d, leftP2.y : %d\n", leftP2.x, leftP2.y);
+			printf("leftP2.x : %d, leftP2.y : %d\n", leftP2.x, leftP2.y);
 			tag = 2;
 		}
 
@@ -274,70 +265,82 @@ int main()
 
 			line(image, pt3, rightP1, Scalar(0, 0, 255), 2, CV_AA);
 
-			softPwmWrite(PWM, 23);
+			softPwmWrite(PWM, 24);
 
 			printf("***********Right Line Detect***********\n");
-			printf("rightP1.x - rightP2.x : %d\n", rightP1.x - rightP2.x);
 			printf("rightP1.x : %d, rightP1.y : %d\n", rightP1.x, rightP1.y);
 			printf("rightP2.x : %d, rightP2.y : %d\n", rightP2.x, rightP2.y);
 			tag = 3;
 		}
 
 		// value normalization
-		if (leftP2.x <= 0 && rightP2.x >= 320) {
+		if (leftP2.x <= -26 && rightP2.x >= 317) {
 			value = 0;
 		}
-		else if (leftP2.x > 0 && leftP2.x <= 80) {
+		else if (leftP1.x >= 200 && leftP1.x <= 250) {
 			value = 1;
+			softPwmWrite(PWM, 26);
 		}
-		else if (leftP2.x > 80 && leftP2.x < 120) {
+		else if (leftP1.x > 250 && leftP1.x <= 400) {
 			value = 2;
-		}
-		else if (leftP2.x > 120 && leftP2.x <= 200) {
-			value = 3;
-		}
-		else if (rightP2.x > 120 && rightP2.x <= 200) {
-			value = -3;
-		}
-		else if (rightP2.x >= 200 && rightP2.x < 240) {
-			value = -2;
-		}
-		else if (rightP2.x >= 240 && rightP2.x < 320) {
-			value = -1;
-		}
-		else if (leftP1.x >= 200 && leftP1.x <= 400) {
-			value = 2;
-			softPwmWrite(PWM, 25);
+			softPwmWrite(PWM, 28);
 		}
 		else if (leftP1.x > 400) {
 			value = 3;
-			softPwmWrite(PWM, 25);
+			softPwmWrite(PWM, 32);
 		}
-		else if (rightP1.x < 120 && rightP1.x >= -80) {
+		else if (rightP1.x < 80 && rightP1.x >= -80) {
+			value = -1;
+			softPwmWrite(PWM, 26);
+		}
+		else if (rightP1.x < -80 && rightP1.x >= -170) {
 			value = -2;
-			softPwmWrite(PWM, 25);
+			softPwmWrite(PWM, 28);
 		}
-		else if (rightP1.x > -80) {
+		else if (rightP1.x < -170) {
 			value = -3;
-			softPwmWrite(PWM, 25);
+			softPwmWrite(PWM, 32);
 		}
-		else {
-			value = 0;
+
+		else if (leftP2.x > -70 && leftP2.x <= 6) {
+			value = 1;
+		}
+		else if (leftP2.x > 6 && leftP2.x < 34) {
+			value = 2;
+		}
+		else if (leftP2.x > 34 && leftP2.x <= 200) {
+			value = 3;
+		}
+		else if (rightP2.x > 120 && rightP2.x <= 257) {
+			value = -3;
+		}
+		else if (rightP2.x > 257 && rightP2.x <= 280) {
+			value = -2;
+		}
+		else if (rightP2.x > 280 && rightP2.x < 350) {
+			value = -1;
 		}
 
 		softPwmWrite(SERVO, 0);
 
-		if (b_value !=  value) {
-			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
+		if (b_value !=  value || count <= 1) {
 			softPwmWrite(SERVO, (standard + value));
 			delay(100);
 		}
+		if (b_value == value){
+			count++;
+		}
+		else	count = 0;
+
+		printf("\n-----value : %d-----\n\n",value);
 
 		b_value = value;
 		/* Servo controll end */
 
-		imshow("Camera1", image);
-		imshow("Camera2", erimg);
+		imshow("image", image);
+		imshow("edgeimg", edgeimg);
+		imshow("closeimg",closeimg);
+		imshow("erimg", erimg);
 
 		t2 = getTickCount();
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;

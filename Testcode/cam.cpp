@@ -21,6 +21,7 @@ int main()
 	int ROI_heightH = floor(height/2);
 	int ROI_heightL = floor(height*3/4);
 
+	int count = 0;
 	int value = 0;
 	int b_value = 0;
 	int tag;
@@ -77,11 +78,11 @@ int main()
 		cvtColor(image, grayimg, CV_BGR2GRAY);
 		GaussianBlur(grayimg, blurimg, Size(3, 3), 0, 0);
 
-		Canny(blurimg, edgeimg, 100, 300);
+		Canny(blurimg, edgeimg, 150, 300);
 
 		int element_shape = MORPH_RECT;
-		Mat element1 = getStructuringElement(element_shape, Size(5,5));
-		Mat element2 = getStructuringElement(element_shape, Size(7,7));
+		Mat element1 = getStructuringElement(element_shape, Size(3,3));
+		Mat element2 = getStructuringElement(element_shape, Size(11,11));
 
 
 		//dilate(edgeimg, dilimg, element1);
@@ -120,15 +121,15 @@ int main()
 				pt4.y=0;
 				leftP1.x=0;
 				leftP1.y=0;
-				leftP2.x=0;
+				leftP2.x=500;
 				leftP2.y=0;
-				rightP1.x=0;
+				rightP1.x=500;
 				rightP1.y=0;
 				rightP2.x=0;
 				rightP2.y=0;
 			}
 
-			if (theta<1.35 && theta>=0)
+			if (theta<1.45 && theta>=0)
 			{
 				theta1 = theta;
 				rho1 = rho;
@@ -143,7 +144,7 @@ int main()
 				tag = 0;
 			}
 
-			else if (theta<3.14 && theta>=2.0)
+			else if (theta<3.14 && theta>=1.7)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -185,8 +186,12 @@ int main()
 			// banishPoint : nodePoint of two equation
 			banishP.x = (int)((interceptR - interceptL) / (gradientL - gradientR));
 			banishP.y = (int)(gradientL * banishP.x + interceptL);
-			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
-			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
+//			line(image, pt2, banishP, Scalar(255, 0, 0), 2, CV_AA);
+//			line(image, pt3, banishP, Scalar(0, 0, 255), 2, CV_AA);
+
+
+			line(image, pt2, pt1, Scalar(255, 0, 0), 2, CV_AA);
+			line(image, pt3, pt4, Scalar(0, 0, 255), 2, CV_AA);
 
 			float b1 = pt2.y - gradientL * pt2.x;
 			leftP2.y = height;
@@ -260,53 +265,65 @@ int main()
 			tag = 3;
 		}
 
+		
 		// value normalization
-		if (leftP2.x <= 0 && rightP2.x >= 320) {
+		if (leftP2.x <= -26 && rightP2.x >= 317) {
 			value = 0;
 		}
-		else if (leftP2.x > 0 && leftP2.x <= 80) {
+		else if (leftP1.x >= 200 && leftP1.x <= 300) {
 			value = 1;
 		}
-		else if (leftP2.x > 80 && leftP2.x < 120) {
-			value = 2;
-		}
-		else if (leftP2.x > 120 && leftP2.x <= 200) {
-			value = 3;
-		}
-		else if (rightP2.x > 120 && rightP2.x <= 200) {
-			value = -3;
-		}
-		else if (rightP2.x >= 200 && rightP2.x < 240) {
-			value = -2;
-		}
-		else if (rightP2.x >= 240 && rightP2.x < 320) {
-			value = -1;
-		}
-		else if (leftP1.x >= 200 && leftP1.x <= 400) {
+		else if (leftP1.x > 300 && leftP1.x <= 400) {
 			value = 2;
 		}
 		else if (leftP1.x > 400) {
 			value = 3;
 		}
-		else if (rightP1.x < 120 && rightP1.x >= -80) {
+		else if (rightP1.x < 80 && rightP1.x >= 0) {
+			value = -1;
+		}
+		else if (rightP1.x < 0 && rightP1.x >= -80) {
 			value = -2;
 		}
-		else if (rightP1.x > -80) {
+		else if (rightP1.x < -80) {
 			value = -3;
 		}
-		else {
-			value = 0;
+
+		else if (leftP2.x > -70 && leftP2.x <= 6) {
+			value = 1;
+		}
+		else if (leftP2.x > 6 && leftP2.x < 34) {
+			value = 2;
+		}
+		else if (leftP2.x > 34 && leftP2.x <= 200) {
+			value = 3;
+		}
+		else if (rightP2.x > 120 && rightP2.x <= 257) {
+			value = -3;
+		}
+		else if (rightP2.x > 257 && rightP2.x <= 280) {
+			value = -2;
+		}
+		else if (rightP2.x > 280 && rightP2.x < 350) {
+			value = -1;
 		}
 
-		if (b_value !=  value) {
-			printf("value : %d, thetaL : %0.2f, thetaR : %0.2f\n", value, thetaL, thetaR);
+		if (b_value !=  value || count <= 1) {
+
 		}
+		if (b_value == value){
+			count++;
+		}
+		else	count = 0;
+
+		printf("\n-----value : %d-----\n\n",value);
 
 		b_value = value;
 		/* Servo controll end */
 
 		imshow("image", image);
 		imshow("edgeimg",edgeimg);
+		imshow("closeimg",closeimg);
 		imshow("erimg", erimg);
 
 		t2 = getTickCount();
