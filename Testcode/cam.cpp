@@ -16,12 +16,12 @@ int main()
 {
 	int width = 320;
 	int height = 240;
-	int ROI_widthL = floor(width/4);
-	int ROI_widthR = floor(width*3/4);
+	int ROI_widthL = floor(width*3/8);
+	int ROI_widthR = floor(width*5/8);
 	int ROI_heightH = floor(height/2);
-	int ROI_heightL = floor(height*3/4);
-
+	int ROI_heightL = floor(height*5/6);
 	int count = 0;
+
 	int value = 0;
 	int b_value = 0;
 	int tag;
@@ -34,7 +34,9 @@ int main()
 	Point rightP1, rightP2;		//right point
 	Point banishP;		//banish point;
 
-	FILE *fp = fopen("/home/pi/spill/Testcode/data/value3.txt", "w");
+	FILE *fp = fopen("/home/pi/spill/Testcode/data/value.txt", "w");
+	FILE *fp1 = fopen("/home/pi/spill/Testcode/data/theta1.txt", "w");
+	FILE *fp2 = fopen("/home/pi/spill/Testcode/data/theta2.txt", "w");
 
 	Size framesize(width, height);
 
@@ -56,7 +58,9 @@ int main()
 	for (int y=0; y<height; y++){
 		for (int x=0; x<width; x++){
 			if (y >= ROI_heightH && y <= ROI_heightL){
-				ROIimg.at<uchar>(y,x) = 255;
+				if (x >= (ROI_widthL - (y - ROI_heightH/2+20)) && x <= (ROI_widthR + (y - ROI_heightH/2+20))){
+					ROIimg.at<uchar>(y,x) = 255;
+				}
 			}
 		}
 	}
@@ -159,11 +163,12 @@ int main()
 				tag = 0;
 			}
 		}
-		theta1 = 1.57 - theta1;
-		theta2 = 4.71 - theta2;
-		thetaL = theta1 * 180 / pi;
-		thetaR = theta2 * 180 / pi;
 		/* Houghline detection end */
+
+		printf("theta1 : %0.3f, theta2 : %0.3f\n",theta1, theta2);
+
+		fprintf(fp1,"%0.3f\n", theta1);
+		fprintf(fp2,"%0.3f\n", theta2);
 
 		/* Servo controll */
 		if (waitKey(30) == 27) {
