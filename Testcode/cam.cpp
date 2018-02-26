@@ -18,7 +18,7 @@ int main()
 	int height = 240;
 	int ROI_widthL = floor(width*3/8);
 	int ROI_widthR = floor(width*5/8);
-	int ROI_heightH = floor(height/2);
+	int ROI_heightH = floor(height/3);
 	int ROI_heightL = floor(height*5/6);
 	int count = 0;
 
@@ -34,9 +34,9 @@ int main()
 	Point rightP1, rightP2;		//right point
 	Point banishP;		//banish point;
 
-	FILE *fp = fopen("/home/pi/spill/Testcode/data/value.txt", "w");
-	FILE *fp1 = fopen("/home/pi/spill/Testcode/data/theta1.txt", "w");
-	FILE *fp2 = fopen("/home/pi/spill/Testcode/data/theta2.txt", "w");
+	FILE *fp = fopen("/home/pi/spill/Testcode/data/value-3.txt", "w");
+//	FILE *fp1 = fopen("/home/pi/spill/Testcode/data/theta1.txt", "w");
+//	FILE *fp2 = fopen("/home/pi/spill/Testcode/data/theta2.txt", "w");
 
 	Size framesize(width, height);
 
@@ -85,8 +85,8 @@ int main()
 		Canny(blurimg, edgeimg, 150, 300);
 
 		int element_shape = MORPH_RECT;
-		Mat element1 = getStructuringElement(element_shape, Size(3,3));
-		Mat element2 = getStructuringElement(element_shape, Size(11,11));
+		Mat element1 = getStructuringElement(element_shape, Size(5,5));
+		Mat element2 = getStructuringElement(element_shape, Size(7,7));
 
 
 		//dilate(edgeimg, dilimg, element1);
@@ -105,7 +105,7 @@ int main()
 		}
 
 		/* Houghline detection */
-		HoughLines(erimg, lines, 1, CV_PI / 180, 50, 0, 0);
+		HoughLines(erimg, lines, 1, CV_PI / 180, 70, 0, 0);
 
 		for (size_t i = 0; i < lines.size(); i++)
 		{
@@ -133,7 +133,7 @@ int main()
 				rightP2.y=0;
 			}
 
-			if (theta<1.45 && theta>=0)
+			if (theta<1.41 && theta>=0)
 			{
 				theta1 = theta;
 				rho1 = rho;
@@ -148,7 +148,7 @@ int main()
 				tag = 0;
 			}
 
-			else if (theta<3.14 && theta>=1.7)
+			else if (theta<3.14 && theta>=1.77)
 			{
 				theta2 = theta;
 				rho2 = rho;
@@ -167,8 +167,8 @@ int main()
 
 		printf("theta1 : %0.3f, theta2 : %0.3f\n",theta1, theta2);
 
-		fprintf(fp1,"%0.3f\n", theta1);
-		fprintf(fp2,"%0.3f\n", theta2);
+		//fprintf(fp1,"%0.3f\n", theta1);
+		//fprintf(fp2,"%0.3f\n", theta2);
 
 		/* Servo controll */
 		if (waitKey(30) == 27) {
@@ -237,7 +237,7 @@ int main()
 			printf("leftP1.x : %d,\t leftP1.y : %d\n", leftP1.x, leftP1.y);
 			printf("leftP2.x : %d,\t leftP2.y : %d\n", leftP2.x, leftP2.y);
 
-			fprintf(fp,"%d\t%d\n", leftP2.x, leftP2.y);
+			//fprintf(fp,"%d\t%d\n", leftP2.x, leftP2.y);
 			//fprintf(fp,"leftP2.x : %d,\t leftP2.y : %d\n", leftP2.x, leftP2.y);
 			tag = 2;
 		}
@@ -265,7 +265,7 @@ int main()
 			printf("rightP1.x : %d,\t rightP1.y : %d\n", rightP1.x, rightP1.y);
 			printf("rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 
-			//fprintf(fp,"%d\t%d\n", rightP2.x, rightP2.y);
+			fprintf(fp,"%d\t%d\n", rightP2.x, rightP2.y);
 			//fprintf(fp,"rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 			tag = 3;
 		}
@@ -329,6 +329,7 @@ int main()
 		imshow("image", image);
 		imshow("edgeimg",edgeimg);
 		imshow("closeimg",closeimg);
+		imshow("ROIimg",ROIimg);
 		imshow("erimg", erimg);
 
 		t2 = getTickCount();
