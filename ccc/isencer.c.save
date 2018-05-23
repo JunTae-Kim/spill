@@ -10,16 +10,16 @@ int main(void)
 
 		pinMode(PIR1, INPUT);
 
-		for(;;){
+		for(;;)
 			if(digitalRead(PIR1) == 0)
 			{
 			printf("NOT Detected\n");
-			delay(200);
+			delay(500);
 			}
 			else{
 			printf("Detection\n");
-			delay(200);
-			}
+			delay(500);
+			}*/
 		}
 	return 0;
 	}

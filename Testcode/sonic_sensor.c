@@ -4,8 +4,8 @@
 
 int main(int argc, char*argv[])
 {
-	int trig = 4;
-	int echo = 5;
+	int trig = 23;
+	int echo = 24;
 	int start_time, end_time;
 	float distance;
 

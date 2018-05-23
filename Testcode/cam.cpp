@@ -34,7 +34,7 @@ int main()
 	Point rightP1, rightP2;		//right point
 	Point banishP;		//banish point;
 
-	FILE *fp = fopen("/home/pi/spill/Testcode/data/value-3.txt", "w");
+//	FILE *fp = fopen("/home/pi/spill/Testcode/data/value-3.txt", "w");
 //	FILE *fp1 = fopen("/home/pi/spill/Testcode/data/theta1.txt", "w");
 //	FILE *fp2 = fopen("/home/pi/spill/Testcode/data/theta2.txt", "w");
 
@@ -265,7 +265,7 @@ int main()
 			printf("rightP1.x : %d,\t rightP1.y : %d\n", rightP1.x, rightP1.y);
 			printf("rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 
-			fprintf(fp,"%d\t%d\n", rightP2.x, rightP2.y);
+			//fprintf(fp,"%d\t%d\n", rightP2.x, rightP2.y);
 			//fprintf(fp,"rightP2.x : %d,\t rightP2.y : %d\n", rightP2.x, rightP2.y);
 			tag = 3;
 		}
@@ -294,22 +294,22 @@ int main()
 			value = -3;
 		}
 
-		else if (leftP2.x > -70 && leftP2.x <= 6) {
+		else if (leftP2.x >= -70 && leftP2.x < -19) {
 			value = 1;
 		}
-		else if (leftP2.x > 6 && leftP2.x < 34) {
+		else if (leftP2.x >= -19 && leftP2.x < 11) {
 			value = 2;
 		}
-		else if (leftP2.x > 34 && leftP2.x <= 200) {
+		else if (leftP2.x >= 11 && leftP2.x <= 200) {
 			value = 3;
 		}
-		else if (rightP2.x > 120 && rightP2.x <= 257) {
+		else if (rightP2.x >= 120 && rightP2.x < 309) {
 			value = -3;
 		}
-		else if (rightP2.x > 257 && rightP2.x <= 280) {
+		else if (rightP2.x >= 309 && rightP2.x < 335) {
 			value = -2;
 		}
-		else if (rightP2.x > 280 && rightP2.x < 350) {
+		else if (rightP2.x >= 335 && rightP2.x <= 380) {
 			value = -1;
 		}
 
