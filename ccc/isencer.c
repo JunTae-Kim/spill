@@ -1,17 +1,17 @@
 #include <stdio.h>
 #include <wiringPi.h>
 
-#define PIR1 25
+#define PIR 25
 
 int main(void)
 	{
 		if(wiringPiSetup() == -1)
 		return 1;
 
-		pinMode(PIR1, INPUT);
+		pinMode(PIR, INPUT);
 
 		for(;;){
-			if(digitalRead(PIR1) == 0)
+			if(digitalRead(PIR) == 0)
 			{
 			printf("NOT Detected\n");
 			delay(200);

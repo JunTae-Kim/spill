@@ -81,12 +81,12 @@ void createTrackbars(){
 	//the max value the trackbar can move (eg. H_HIGH),
 	//and the function that is called whenever the trackbar is moved(eg. on_trackbar)
 	//                                  ---->    ---->     ---->
-	createTrackbar( "H_MIN", trackbarWindowName, &H_MIN, H_MAX, on_trackbar );
-	createTrackbar( "H_MAX", trackbarWindowName, &H_MAX, H_MAX, on_trackbar );
-	createTrackbar( "S_MIN", trackbarWindowName, &S_MIN, S_MAX, on_trackbar );
-	createTrackbar( "S_MAX", trackbarWindowName, &S_MAX, S_MAX, on_trackbar );
-	createTrackbar( "V_MIN", trackbarWindowName, &V_MIN, V_MAX, on_trackbar );
-	createTrackbar( "V_MAX", trackbarWindowName, &V_MAX, V_MAX, on_trackbar );
+	createTrackbars( "H_MIN", trackbarWindowName, &H_MIN, H_MAX, on_trackbar );
+	createTrackbars( "H_MAX", trackbarWindowName, &H_MAX, H_MAX, on_trackbar );
+	createTrackbars( "S_MIN", trackbarWindowName, &S_MIN, S_MAX, on_trackbar );
+	createTrackbars( "S_MAX", trackbarWindowName, &S_MAX, S_MAX, on_trackbar );
+	createTrackbars( "V_MIN", trackbarWindowName, &V_MIN, V_MAX, on_trackbar );
+	createTrackbars( "V_MAX", trackbarWindowName, &V_MAX, V_MAX, on_trackbar );
 }
 
 void drawObject(vector<Object> theObjects,Mat &frame, Mat &temp, vector< vector<Point> > contours, vector<Vec4i> hierarchy){
