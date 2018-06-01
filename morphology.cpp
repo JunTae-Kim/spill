@@ -97,7 +97,7 @@ int main()
 		cvtColor(image, grayimg, CV_BGR2GRAY);
 		GaussianBlur(grayimg, blurimg, Size(3, 3), 0, 0);
 
-		Canny(blurimg, edgeimg, 200, 300);
+		Canny(blurimg, edgeimg, 150, 250);
 
 		int element_shape = MORPH_RECT;
 		Mat element1 = getStructuringElement(element_shape, Size(3,3));
@@ -218,6 +218,7 @@ int main()
 
 			printf("***********Both Line Detect***********\n");
 			printf("banishP.x : %d, banishP.y : %d\n", banishP.x, banishP.y);
+			printf("leftP1.x : %d, rightP1.x : %d\n", leftP1.x, rightP1.x);
 			printf("leftP2.x : %d, rightP2.x : %d\n", leftP2.x, rightP2.x);
 			tag = 1;
 		}
@@ -279,27 +280,33 @@ int main()
 		if (leftP2.x <= -20 && rightP2.x >= 325) {
 			value = 0;
 		}
-		else if (leftP1.x >= 250 && leftP1.x <= 280) {
+		else if (leftP1.x >= 100 && leftP1.x <= 200){
+			value = 0;
+		}
+		else if (leftP1.x >= 200 && leftP1.x <= 550) {
 			value = 1;
 		}
-		else if (leftP1.x > 280 && leftP1.x <= 350) {
+		else if (leftP1.x > 550 && leftP1.x <= 700) {
 			value = 2;
 		}
-		else if (leftP1.x > 350) {
-			softPwmWrite(PWM, 32);
+		else if (leftP1.x > 700) {
+			softPwmWrite(PWM, 28);
 			value = 3;
 		}
-		else if (rightP1.x < 100 && rightP1.x >= 30) {
+		else if (rightP1.x < 200 && rightP1.x >= 0) {
+			value = 0;
+		}
+		else if (rightP1.x < 0 && rightP1.x >= -350) {
 			value = -1;
 		}
-		else if (rightP1.x <= 30 && rightP1.x > -25) {
+		else if (rightP1.x <= -350 && rightP1.x > -550) {
 			value = -2;
 		}
-		else if (rightP1.x < -25) {
-			softPwmWrite(PWM, 32);
+		else if (rightP1.x < -550) {
+			softPwmWrite(PWM, 28);
 			value = -3;
 		}
-
+/*
 		else if (leftP2.x >= -70 && leftP2.x < 0) {
 			value = 1;
 		}
@@ -318,6 +325,7 @@ int main()
 		else if (rightP2.x >= 290 && rightP2.x <= 380) {
 			value = -1;
 		}
+*/
 
 		softPwmWrite(SERVO, 0);
 
@@ -336,12 +344,12 @@ int main()
 		/* Servo controll end */
 
 		imshow("image", image);
-		imshow("gray", grayimg);
-		imshow("blur", blurimg);
+//		imshow("gray", grayimg);
+//		imshow("blur", blurimg);
 		imshow("edgeimg", edgeimg);
 //		imshow("closeimg",closeimg);
 		imshow("erimg", erimg);
-		imshow("ROIimg",ROIimg);
+//		imshow("ROIimg",ROIimg);
 
 		t2 = getTickCount();
 		cout << "It took " << (t2 - t1) * 1000 / getTickFrequency() << " ms." << endl;

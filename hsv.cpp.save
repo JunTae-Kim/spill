@@ -12,35 +12,36 @@
 using namespace cv;
 using namespace std;
 
-void pwm(int milliseconds, int pin);
-
-#define SERVO_CAM 28
-#define PIR 25
-#define SERVO 26
-#define PWM 1
-#define DIR 22
-#define RANGE 200
-#define standard 8
-#define pi 3.141592
-
-Mat img_hsv, img_binary1, img_binary2, img_binary3, CUTimage;
-
-void pwm(int milliseconds, int pin);
-void Traffic_light(Mat img_input);	
-
-int width = 320;
-int height = 240;
-
-int Count_R = 0;
-int Count_Y = 0;
-int Count_GR = 0;
-int Count_GL = 0;
-int signal = 0;
-int dir;
-
-
 int main()
 {
+	int64 t1, t2;
+	int width = 320;
+	int height = 240;
+
+	int LowH1 = 170;
+	int HighH1 = 179;		//red
+
+	int LowH2 = 24;
+	int HighH2 = 33;		//yellow
+
+	int LowH3 = 58;
+	int HighH3 = 72;		//green
+
+	int LowS = 50;
+	int HighS = 255;
+
+	int LowV = 0;
+	int HighV = 255;
+
+	//cvCreateTrackbar("LowH", "setting", &LowH, 179);
+	//cvCreateTrackbar("HighH", "setting", &HighH, 179);
+
+	//cvCreateTrackbar("LowS", "setting", &LowS, 255);
+	//cvCreateTrackbar("HighS", "setting", &HighS, 255);
+
+	//cvCreateTrackbar("LowV", "setting", &LowV, 255);
+	//cvCreateTrackbar("HighV", "setting", &HighV, 255);
+
 	Size framesize(width, height);
 
 	raspicam::RaspiCam_Cv cam;
@@ -56,27 +57,12 @@ int main()
 
 	if (wiringPiSetup() == -1) return 1; //wiringPi error
 
-	pinMode(PIR, INPUT);
-	pinMode(PWM, OUTPUT);
+
+	Mat img_input, img_hsv, img_binary1, img_binary2, img_binary3, CUTimage;
 
 
-	int64 t1, t2;
-	int tag = 0;
-	int Pcount = 0;
+	/* ROI image end */
 
-	//cvCreateTrackbar("LowH", "setting", &LowH, 179);
-	//cvCreateTrackbar("HighH", "setting", &HighH, 179);
-
-	//cvCreateTrackbar("LowS", "setting", &LowS, 255);
-	//cvCreateTrackbar("HighS", "setting", &HighS, 255);
-
-	//cvCreateTrackbar("LowV", "setting", &LowV, 255);
-	//cvCreateTrackbar("HighV", "setting", &HighV, 255);
-
-
-	pwm(1850, SERVO_CAM);
-
-	Mat img_input;
 	bool do_flip = false;
 
 	vector<Vec2f> lines;
@@ -89,19 +75,6 @@ int main()
 
 		if (do_flip)
 			flip(img_input, img_input, -1);
-
-		if(digitalRead(PIR) == 1)
-		{
-			Pcount++;
-			if (Pcount == 5){
-				printf("Detection\n");
-				tag = 2;
-			}
-		}
-		else
-		{
-			Pcount=0;
-		}
 
 		CUTimage = img_input(Range(60,180), Range(80,240));
 		resize(CUTimage, CUTimage, Size(0,0), 2, 2);
@@ -134,74 +107,62 @@ int main()
 		Mat img_labels, stats, centroids;
 		int numOfLables = connectedComponentsWithStats(img_binary1, img_labels, stats, centroids, 8, CV_32S);
 
-		int max1 = 500, idx1=0;
+		int max = , idx=0;
 		for (int j = 1; j < numOfLables; j++){
 			int area = stats.at<int>(j, CC_STAT_AREA);
-			if(max1 < area)
+			if(max < area)
 			{
-				max1 = area;
-				idx1 = j;
+				max = area;
+				idx = j;
 			}
 		}
-		if (max1 > 500) {
-			printf("Red signal - stop!!\t");
-			putText(CUTimage,"Red Signal",Point(0,220), 2, 1, Scalar(0,0,255));
-		}
 
-		int left = stats.at<int>(idx1, CC_STAT_LEFT);
-		int top = stats.at<int>(idx1, CC_STAT_TOP);
-		int width = stats.at<int>(idx1, CC_STAT_WIDTH);
-		int height = stats.at<int>(idx1, CC_STAT_HEIGHT);
+		int left = stats.at<int>(idx, CC_STAT_LEFT);
+		int top = stats.at<int>(idx, CC_STAT_TOP);
+		int width = stats.at<int>(idx, CC_STAT_WIDTH);
+		int height = stats.at<int>(idx, CC_STAT_HEIGHT);
+
+
 
 		rectangle(CUTimage, Point(left,top), Point(left+width,top+height), Scalar(0,0,255),2);
 
 		numOfLables = connectedComponentsWithStats(img_binary2, img_labels, stats, centroids, 8, CV_32S);
 
-		int max2 = 500, idx2=0;
+		max = -1, idx=0;
 		for (int j = 1; j < numOfLables; j++){
 			int area = stats.at<int>(j, CC_STAT_AREA);
-			if(max2 < area)
+			if(max < area)
 			{
-				max2 = area;
-				idx2 = j;
+				max = area;
+				idx = j;
 			}
 		}
-		if (max2 > 500){
-			printf("Yellow signal - wait!!\t");
-			putText(CUTimage,"Yellow Signal",Point(0,220), 2, 1, Scalar(0,255,255));
-		}
 
-		left = stats.at<int>(idx2, CC_STAT_LEFT);
-		top = stats.at<int>(idx2, CC_STAT_TOP);
-		width = stats.at<int>(idx2, CC_STAT_WIDTH);
-		height = stats.at<int>(idx2, CC_STAT_HEIGHT);
+		left = stats.at<int>(idx, CC_STAT_LEFT);
+		top = stats.at<int>(idx, CC_STAT_TOP);
+		width = stats.at<int>(idx, CC_STAT_WIDTH);
+		height = stats.at<int>(idx, CC_STAT_HEIGHT);
+
+
 
 		rectangle(CUTimage, Point(left,top), Point(left+width,top+height), Scalar(0,255,255),2);
 
 		numOfLables = connectedComponentsWithStats(img_binary3, img_labels, stats, centroids, 8, CV_32S);
 
-		int max3 = 100, idx3=0;
+		max = -1, idx=0;
 		for (int j = 1; j < numOfLables; j++){
 			int area = stats.at<int>(j, CC_STAT_AREA);
-			if(max3 < area)
+			if(max < area)
 			{
-				max3 = area;
-				idx3 = j;
+				max = area;
+				idx = j;
 			}
 		}
-		if (max3 > 150 && max3 < 500){
-			printf("green signal - go left");
-			putText(CUTimage,"Green Signal - left",Point(0,220), 2, 1, Scalar(0,255,0));
-		}
-		else if (max3 >= 500){
-			printf("green signal - go right");
-			putText(CUTimage,"Green Signal - right",Point(0,220), 2, 1, Scalar(0,255,0));
-		}
 
-		left = stats.at<int>(idx3, CC_STAT_LEFT);
-		top = stats.at<int>(idx3, CC_STAT_TOP);
-		width = stats.at<int>(idx3, CC_STAT_WIDTH);
-		height = stats.at<int>(idx3, CC_STAT_HEIGHT);
+		left = stats.at<int>(idx, CC_STAT_LEFT);
+		top = stats.at<int>(idx, CC_STAT_TOP);
+		width = stats.at<int>(idx, CC_STAT_WIDTH);
+		height = stats.at<int>(idx, CC_STAT_HEIGHT);
 
 
 
@@ -229,18 +190,4 @@ int main()
 	destroyAllWindows();
 
 	return 0;
-}
-
-
-void pwm(int milliseconds, int pin)
-{
-	float range = 20000;
-	float range_signal = milliseconds;
-	for (int i= 0; i<10;i++)
-	{
-		digitalWrite(pin, HIGH);
-		delayMicroseconds(range_signal);
-		digitalWrite(pin, LOW);
-		delayMicroseconds(range-range_signal);
-	}
 }
